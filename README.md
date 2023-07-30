@@ -2,7 +2,7 @@
 
 **Developed by Luke P. Frash**
 
-General:
+## General:
 This Geothermal Design Tool (GeoDT) is a fast multi-well flow and heat transfer model intended to aid high-level decision making 
 for enhanced geothermal systems - geothermal energy development. This tool: 
 1. generates a 3D geometry that includes wells and fractures
@@ -18,7 +18,7 @@ for enhanced geothermal systems - geothermal energy development. This tool:
 
 *This code is in active development. We appreciate comments and questions that will help to improve this project.*
 
-File descriptions:
+## File descriptions:
 - `GeoDT.py`: main program to create and analyze fracture-well system geothermal productivity
 - `GeoDTviewer.py`: supporting scripts for statistical analysis and plotting of multiple GeoDT runs using the csv file output 
 from GeoDT and an input
@@ -27,7 +27,18 @@ from GeoDT and an input
 - `libs/`: GeoDT subroutines
 - `iapws/`: courtesy copy of the IAPWS steam table dependency used by GeoDT
 
-Instructions for first run (assumes that you are working from install directory):
+## Instructions for first run (assumes that you are working from install directory):
+
+### Set up Virtual Environment (strongly recommended)
+
+```shell
+python -m venv ./venv
+pip install --upgrade pip
+pip install -r requirements.txt
+source venv/bin/activate
+```
+
+### Steps
 1. Pick an example script from "examples" and copy it to the main directory
     - `validation_` files generally specify deterministic geometries and boundary conditions
     - `example_` files are generally stochastic multi-run models that focus on EGS design optimization
