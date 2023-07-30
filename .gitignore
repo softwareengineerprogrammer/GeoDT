@@ -5,3 +5,8 @@ venv
 *.vtk
 *.png
 !Intro Graphic.png
+
+example_*.py
+!example_datathon_2023.py
+
+validation_*.py
