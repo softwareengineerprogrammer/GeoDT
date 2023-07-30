@@ -470,7 +470,7 @@ class surf:
         self.hydroprop = False
         self.prop_load = 0.0 #m3 #absolute proppant volume
         self.prop_alpha = norm_trunc(1,rock.prop_alpha[1],rock.prop_alpha[1],rock.prop_alpha[0],rock.prop_alpha[2])[0] #proppant compressibility modulus
-        self.roughness = np.random.uniform(rock.f_roughness[0],rock.f_roughness[2],(1))[0] #open flow roughness
+        self.roughness = rock.f_roughness if type(rock.f_roughness) is float else np.random.uniform(rock.f_roughness[0],rock.f_roughness[2],(1))[0] #open flow roughness
         self.kf = rock.kf #proppant pack permeability
         #scaling
         self.u_N = -1.0
