@@ -160,7 +160,7 @@ for i in range(0,1):
     #generate natural fractures
     geom.gen_joint_sets() #!!!
     #### *** place 'known' deterministic fractures ***
-    if len(data>0):
+    if len(data)>0:
         for f in range(0,len(data)):
             c0 = [c0s[0][f],c0s[1][f],c0s[2][f]]
             dia = dias[f]
@@ -241,9 +241,9 @@ for i in range(0,1):
                 geom.save('inputs_results_FORGE.txt',pin,aux=aux,printwells=0,time=True)
             
             # if False:
-            except: #placeholder for failed models, bote that sometimes models fail for physical reasons (not just unhandled numerical errors)
+            except Exception as e: #placeholder for failed models, note that sometimes models fail for physical reasons (not just unhandled numerical errors)
                 #(note that failed models can signifiy a failed feild test, so failures are a valid result)
-                print( 'solver failure!')
+                print(f'Solver failure: {e}')
                 
             #generate next pin
             pin = np.random.randint(100000000,999999999,1)[0]
