@@ -18,6 +18,8 @@ for enhanced geothermal systems - geothermal energy development. This tool:
 
 *This code is in active development. We appreciate comments and questions that will help to improve this project.*
 
+![](Intro%20Graphic.png)
+
 ## File descriptions:
 - `GeoDT.py`: main program to create and analyze fracture-well system geothermal productivity
 - `GeoDTviewer.py`: supporting scripts for statistical analysis and plotting of multiple GeoDT runs using the csv file output 
@@ -25,11 +27,10 @@ from GeoDT and an input
 - `documentation/`: information about the input and output variables and the model's methods
 - `examples/`: example scripts that run GeoDT using the input values as specified in the example scripts
 - `libs/`: GeoDT subroutines
-- `iapws/`: courtesy copy of the IAPWS steam table dependency used by GeoDT
 
 ## Instructions for first run (assumes that you are working from install directory):
 
-### Set up Virtual Environment (strongly recommended)
+### Set up [Virtual Environment](https://virtualenv.pypa.io/en/latest/) (strongly recommended)
 
 ```shell
 python -m venv ./venv
@@ -38,12 +39,14 @@ pip install -r requirements.txt
 source venv/bin/activate
 ```
 
+If you do not set up virtualenv, you will need to ensure that the dependencies in `requirements.txt` are installed in global site packages (`pip install -r requirements.txt`)
+
 ### Steps
-1. Pick an example script from "examples" and copy it to the main directory
+1. Pick an example script from `examples/` and copy it to the main directory
     - `validation_` files generally specify deterministic geometries and boundary conditions
     - `example_` files are generally stochastic multi-run models that focus on EGS design optimization
-1. Set your python working directory to a location where you want the output files to be created
-1. Run the example script
-1. View the result vtk files using a compatible visualization software (e.g., ParaView)
+1. Set your python working directory to a location where you want the output files to be created, i.e. `mkdir -p build && rm build/*`
+1. Run the example script i.e. `cd build && python ./example_datathon_2023.py`
+1. View the result vtk files using a compatible visualization software (e.g., [ParaView](https://www.paraview.org/))
 1. Inspect the example script and edit as needed to customize to your modeling goals
 
