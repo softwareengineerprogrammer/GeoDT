@@ -1,6 +1,7 @@
 # ****************************************************************************
 #### Datathon 2023 example script - Luke Frash using data from Aleta Finnila
 # ****************************************************************************
+from pathlib import Path
 
 # ****************************************************************************
 #### standard imports
@@ -27,7 +28,15 @@ gal = 1.0/264.172 #m3
 #### import your fracture geometry interpreted from microseismic + more #!!!
 # ****************************************************************************
 #read in the data
-data = np.recfromcsv('MS_DFN_Global_Coords.csv',delimiter=',',filling_values=np.nan,deletechars='()',case_sensitive=True,names=True)
+data = np.recfromcsv(
+    Path(Path(__file__).parent, 'MS_DFN_Global_Coords.csv'),
+    delimiter=',',
+    filling_values=np.nan,
+    deletechars='()',
+    case_sensitive=True,
+    names=True
+)
+
 #correct orientation to GeoDT expected definitions (Azimuth north strike, dip 90 degrees clockwise from strike, dip down from horizon)
 strikes = (data['Trend[deg]']+90.0)*deg
 dips = (90.0-data['Plunge[deg]'])*deg
