@@ -21,7 +21,7 @@ mD = gt.mD
 # ****************************************************************************        
 #create model object
 geom = []
-geom = gt.mesh()
+geom = gt.Mesh()
 
 #rock properties
 geom.rock.size = 1000.0 #m

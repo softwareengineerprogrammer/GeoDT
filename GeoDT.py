@@ -206,7 +206,11 @@ def norm_trunc(nsam, mu=0.0, dev=1.0,
     return s0
 
 
-class cauchy:  # functions modified from JPM
+class Cauchy:
+    """
+    functions modified from JPM
+    """
+
     def __init__(self):
         self.sigP = np.zeros((3, 3), dtype=float)
         self.sigG = np.zeros((3, 3), dtype=float)
@@ -216,8 +220,10 @@ class cauchy:  # functions modified from JPM
         self.Sh_azn = 0.0 * deg  # rad
         self.Sh_dip = 0.0 * deg  # rad
 
-    # http://stackoverflow.com/questions/6802577/python-rotation-of-3d-vector
     def rotationMatrix(self, axis, theta):
+        """
+        http://stackoverflow.com/questions/6802577/python-rotation-of-3d-vector
+        """
         # return the rotation matrix associated with counterclockwise rotation about the given axis by theta radians.
         axis = np.asarray(axis)
         axis = axis / math.sqrt(np.dot(axis, axis))
@@ -229,13 +235,17 @@ class cauchy:  # functions modified from JPM
                          [2 * (bc - ad), aa + cc - bb - dd, 2 * (cd + ab)],
                          [2 * (bd + ac), 2 * (cd - ab), aa + dd - bb - cc]])
 
-    # http://www.continuummechanics.org/stressxforms.html
     def rotateTensor(self, tensor, axis, theta):
+        """
+        http://www.continuummechanics.org/stressxforms.html
+        """
         rot = self.rotationMatrix(axis, theta)
         return np.dot(rot, np.dot(tensor, np.transpose(rot)))
 
-    # Projection of normal plane from dip directions
     def normal_from_dip(self, dip_direction, dip_angle):
+        """
+        Projection of normal plane from dip directions
+        """
         # dip_direction=0 is north -> nrmxH=0, nrmyH=1
         # dip_direction=90 is east -> nrmxH=1, nrmyH=0
         nrmxH = np.sin(dip_direction)
@@ -247,8 +257,10 @@ class cauchy:  # functions modified from JPM
         nrmz = np.cos(dip_angle)
         return np.asarray([nrmx, nrmy, nrmz])
 
-    # normal stress and critical slip or opening pressure
     def Pc(self, nrmP, phi, mcc):
+        """
+        normal stress and critical slip or opening pressure
+        """
         # Shear traction on the fault segment
         t = np.zeros([3])
         for i in range(3):
@@ -271,14 +283,18 @@ class cauchy:  # functions modified from JPM
         Pc = np.min([Pc1, Pc2])
         return Pc, Sn, tau
 
-    # critical slip given fracture strike and dip
     def Pc_frac(self, strike, dip, phi, mcc):
+        """
+        critical slip given fracture strike and dip
+        """
         # get fracture normal vector
         nrmG = self.normal_from_dip(strike + np.pi / 2, dip)
         return self.Pc(nrmG, phi, mcc)
 
-    # Set cauchy stress tensor from rotated principal stresses
     def set_sigG_from_Principal(self, Sh, SH, SV, ShAzn, ShDip):
+        """
+        Set cauchy stress tensor from rotated principal stresses
+        """
         # Stresses in the principal stress directions
         # We have been given the azimuth of the minimum stress, ShAzimuthDeg, to compare with 90 (x-dir)
         # That is Sh==Sxx, SH=Syy, SV=Szz in the principal stress coord system
@@ -302,8 +318,11 @@ class cauchy:  # functions modified from JPM
         self.Sh_dip = ShDip  # Deg*deg #rad
         return sigG
 
-    # Plot citical pressure
     def plot_Pc(self, phi, mcc, filename='Pc_stereoplot.png'):
+        """
+        Plot critical pressure
+        """
+
         # Working variables
         nRad = 100
         dip_angle_deg = np.asarray(range(nRad + 1)) * (90.0 / nRad)
@@ -335,8 +354,11 @@ class cauchy:  # functions modified from JPM
         pylab.close()
 
 
-# reservoir object
-class reservoir:
+class Reservoir:
+    """
+    reservoir object
+    """
+
     def __init__(self):
         # rock properties
         self.size = 800.0  # m
@@ -356,6 +378,7 @@ class reservoir:
         self.s3AznVar = 0.0 * deg
         self.s3Dip = 0.0 * deg
         self.s3DipVar = 0.0 * deg
+
         # fracture orientation parameters #[i,:] set, [0,0:2] min, max --or-- nom, std
         self.fNum = np.asarray([10,
                                 10,
@@ -369,6 +392,7 @@ class reservoir:
         self.fDip = np.asarray([[60.0 * deg, 8.0 * deg],
                                 [90.0 * deg, 8.0 * deg],
                                 [0.0 * deg, 8.0 * deg]], dtype=float)  # m
+
         # fracture hydraulic parameters
         self.gamma = np.asarray([10.0 ** -3.0, 10.0 ** -2.0, 10.0 ** -1.2])
         self.n1 = np.asarray([1.0, 1.0, 1.0])
@@ -382,6 +406,7 @@ class reservoir:
         self.bh_max = 0.02  # 0.02000 #m
         self.bh_bound = 0.003
         self.f_roughness = np.asarray([0.80, 0.90, 1.00])
+
         # well parameters
         self.w_count = 3  # wells
         self.w_spacing = 200.0  # m
@@ -397,13 +422,15 @@ class reservoir:
         self.rb = self.ra + 0.0254 * 0.5  # m
         self.rc = self.ra + 0.0254 * 1.0  # m
         self.rgh = 80.0
+
         # cement properties
         self.CemKt = 2.0  # W/m-K
         self.CemSv = 2000.0  # kJ/m3-K
+
         # thermal-electric power parameters
         self.GenEfficiency = 0.85  # kWe/kWt
-        #        self.InjPres = 1.0 #Example: 0.135 #Model: 2.0 # MPa
-        #        self.TargetPower = 1000 #Example: 2964 # kWe
+        # self.InjPres = 1.0 #Example: 0.135 #Model: 2.0 # MPa
+        # self.TargetPower = 1000 #Example: 2964 # kWe
         self.LifeSpan = 20.5 * yr  # years
         self.TimeSteps = 41  # steps
         self.p_whp = 1.0 * MPa  # Pa
@@ -411,21 +438,25 @@ class reservoir:
         self.H_ConvCoef = 3.0  # kW/m2-K
         self.dT0 = 10.0  # K
         self.dE0 = 500.0  # kJ/m2
+
         # water base parameters
         self.PoreRho = 980.0  # kg/m3 starting guess
         self.Poremu = 0.9 * cP  # Pa-s
         self.Porek = 0.1 * mD  # m2
         self.kf = 300.0 * um2cm  # m2
+
         # calculated parameters
         self.BH_T = self.ResDepth * 10 ** -3.0 * self.ResGradient + self.AmbTempC + 273.15  # K
         self.BH_P = self.PoreRho * g * self.ResDepth + self.AmbPres  # Pa
         self.s1 = self.ResRho * g * self.ResDepth  # Pa
         self.s2 = self.Ks2 * (self.s1 - self.BH_P) + self.BH_P  # Pa
         self.s3 = self.Ks3 * (self.s1 - self.BH_P) + self.BH_P  # Pa
+
         # cauchy stress
-        self.stress = cauchy()
+        self.stress = Cauchy()
         self.stress.set_sigG_from_Principal(self.s3, self.s2, self.s1, self.s3Azn, self.s3Dip)
-        #        self.stress.plot_Pc(30.0*deg,5.0*MPa)
+        # self.stress.plot_Pc(30.0*deg,5.0*MPa)
+
         # stimulation parameters
         self.perf = 1
         self.r_perf = 50.0  # m
@@ -460,29 +491,36 @@ class reservoir:
         # self.rc = self.ra + 0.0254*1.0 # m
 
 
-# surface object
-class surf:
+class Surface:
+    """
+    surface object
+    """
     def __init__(self, x0=0.0, y0=0.0, z0=0.0, dia=1.0, stk=0.0 * deg, dip=90.0 * deg,
-                 ty='fracture', rock=reservoir(),
+                 ty='fracture', rock=Reservoir(),
                  mcc=-1, phi=-1):
         # *** base parameters ***
+
         # node number of center point
         self.ci = -1
+
         # geometry
         self.c0 = np.asarray([x0, y0, z0])
         self.dia = dia
         self.str = stk
         self.dip = dip
         self.typ = typ(ty)
+
         # shear strength
         self.phi = -1.0  # rad
         self.mcc = -1.0  # Pa
+
         # stress state
         self.sn = 5.0 * MPa
         self.En = 50.0 * GPa
         self.vn = 0.30
         self.Pc = 0.0 * MPa
         self.tau = 0.0 * MPa
+
         # stimulation information
         self.stim = 0
         self.Pmax = 0.0 * MPa
@@ -496,6 +534,7 @@ class surf:
         self.roughness = rock.f_roughness if type(rock.f_roughness) is float else \
         np.random.uniform(rock.f_roughness[0], rock.f_roughness[2], (1))[0]  # open flow roughness
         self.kf = rock.kf  # proppant pack permeability
+
         # scaling
         self.u_N = -1.0
         self.u_alpha = -1.0
@@ -525,8 +564,10 @@ class surf:
             self.mcc = np.random.uniform(rock.mcc[0], rock.mcc[2], (1))[0]
         else:
             self.mcc = mcc
+
         # stress state
         self.Pc, self.sn, self.tau = rock.stress.Pc_frac(self.str, self.dip, self.phi, self.mcc)
+
         # apertures
         self.bd = self.bh / self.u_N
         self.bd0 = self.bd
@@ -534,50 +575,69 @@ class surf:
         self.vol = (4.0 / 3.0) * pi * 0.25 * self.dia ** 2.0 * 0.5 * self.bd
         self.arup = 0.25 * np.pi * self.dia ** 2.0
 
-    # adjust fracture cohesion to prevent runaway stimulation at specified conditions
-    def check_integrity(self, rock=reservoir(), pres=0.0):
+    def check_integrity(self, rock=Reservoir(), pres=0.0):
+        """
+        adjust fracture cohesion to prevent runaway stimulation at specified conditions
+        """
         # originally assigned values
         Pc0 = self.Pc
         mcc0 = self.mcc
         phi0 = self.phi
+
         # shear stability limit
         mcc_c = self.tau - (self.sn - pres) * np.tan(self.phi)
+
         # tensile stability limit
         mcc_t = pres - self.sn
+
         # update fracture cohesion to ensure stability at the input conditions
         self.mcc = np.max([self.mcc, mcc_c, mcc_t])
+
         # recompute critical conditions
         self.Pc, self.sn, self.tau = rock.stress.Pc_frac(self.str, self.dip, self.phi, self.mcc)
+
         # output message
         if self.Pc > Pc0:
             print(
                 'alert: critical fracture at Tau = %.2e, sn = %.2e, and Pp %.2e having phi = %.2e rad, mcc = %.2e Pa, Pc = %.2e Pa adjusted to phi = %.2e rad, mcc = %.2e Pa, Pc = %.2e Pa'
                 % (self.tau, self.sn, pres, phi0, mcc0, Pc0, self.phi, self.mcc, self.Pc))
 
-    # set fracture cohesion to critical value at specified conditions
-    def make_critical(self, rock=reservoir(), pres=0.0):
+    def make_critical(self, rock=Reservoir(), pres=0.0):
+        """
+        set fracture cohesion to critical value at specified conditions
+        """
         # shear stability limit
         mcc_c = self.tau - (self.sn - pres) * np.tan(self.phi)
+
         # tensile stability limit
         mcc_t = pres - self.sn
+
         # update fracture cohesion to enforce critical stability at the input conditions
         self.mcc = np.max([mcc_c, mcc_t])
+
         # recompute critical conditions
         self.Pc, self.sn, self.tau = rock.stress.Pc_frac(self.str, self.dip, self.phi, self.mcc)
+
         # output message
         print('         hydrofrac critical cohesion calculated as %.2e Pa to obtain Pc = %.2e Pa' % (self.mcc, self.Pc))
         # error case
         if self.Pc <= self.sn:
             print('         *** error: solution gives closed supercritical shear instead of hydrofracture')
 
-    # adjust frictional properties to prevent runaway stimulation at specified conditions (attempts to get more reasonable friction angle or more reasonable cohesion... but doesn't work well)
-    def check_integrity_old(self, rock=reservoir(), pres=0.0):
+    def check_integrity_old(self, rock=Reservoir(), pres=0.0):
+        """
+        adjust frictional properties to prevent runaway stimulation at specified conditions
+        (attempts to get more reasonable friction angle or more reasonable cohesion... but doesn't work well)
+        """
         # tensile stability
         mcc_t = pres - self.sn
+
         # low shear stress stability
         mcc_s = self.tau - (self.sn - pres) * np.tan(self.phi)
+
         # high shear stress stability
         phi_s = np.arctan((self.tau - self.mcc) / (self.sn - pres))
+
         # shear failure critical angle
         if (pres < self.sn) and (self.mcc < self.tau):
             mcc_crit = 0.0
@@ -586,14 +646,17 @@ class surf:
         else:
             mcc_crit = np.max([mcc_t, mcc_s])
             phi_crit = 0.0
+
         # update fracture properties to attain stability at the input conditions
         Pc0 = self.Pc
         mcc0 = self.mcc
         phi0 = self.phi
         self.phi = np.max([self.phi, phi_crit])
         self.mcc = np.max([self.mcc, mcc_crit])
+
         # recompute critical conditions
         self.Pc, self.sn, self.tau = rock.stress.Pc_frac(self.str, self.dip, self.phi, self.mcc)
+
         # output message
         if self.Pc > Pc0:
             print(
@@ -619,31 +682,51 @@ class surf:
         #     print('-- new Pc = %.3e Pa' %(self.Pc))
 
 
-# line objects
-class line:
-    def __init__(self, x0=0.0, y0=0.0, z0=0.0, length=1.0, azn=0.0 * deg, dip=0.0 * deg, w_type='pipe',
-                 ra=0.0254 * 3.0, rb=0.0254 * 3.5, rc=0.0254 * 3.5, rough=80.0):
+class Line:
+    """
+    line objects
+    """
+    def __init__(self,
+                 x0=0.0,
+                 y0=0.0,
+                 z0=0.0,
+                 length=1.0,
+                 azn=0.0 * deg,
+                 dip=0.0 * deg,
+                 w_type='pipe',
+                 ra=0.0254 * 3.0,
+                 rb=0.0254 * 3.5,
+                 rc=0.0254 * 3.5,
+                 rough=80.0):
+
         # position geometry
         self.c0 = np.asarray([x0, y0, z0])  # origin
         self.leg = length  # length
         self.azn = azn  # axis azimuth north
         self.dip = dip  # axis dip from horizontal
         self.typ = typ(w_type)  # type of well
+
         # flow geometry
         self.ra = ra  # m
         self.rb = rb  # m
         self.rc = rc  # m
         self.rgh = rough
+
         # stimulation traits
         self.hydrofrac = False  # was well already hydrofraced?
         self.completed = False  # was well stimulation process completed?
         self.stabilize = False  # was well flow stabilied?
 
 
-# node list object
-class nodes:
-    # initialization
+class Nodes:
+    """
+    node list object
+    """
+
     def __init__(self):
+        """
+        initialization
+        """
         self.r0 = np.asarray([np.inf, np.inf, np.inf])
         self.all = np.asarray([self.r0])
         self.tol = 0.0005
@@ -652,9 +735,12 @@ class nodes:
         self.T = np.zeros(self.num, dtype=float)
         self.h = np.zeros(self.num, dtype=float)
 
-    #        self.f_id = [[-1]]
-    # add a node
+        # self.f_id = [[-1]]
+
     def add(self, c=np.asarray([0.0, 0.0, 0.0])):  # ,f_id=-1):
+        """
+        add a node
+        """
         # round to within tolerance
         if not (np.isinf(c[0])):
             c = np.rint(c / self.tol) * self.tol
@@ -678,10 +764,13 @@ class nodes:
             return True, len(self.all) - 1
 
 
-# pipe list object
-class pipes:
-    # initialization
+class Pipes:
+    """
+    pipe list object
+    """
+
     def __init__(self):
+        # initialization
         self.num = 0
         self.n0 = []  # source node
         self.n1 = []  # target node
@@ -712,8 +801,10 @@ class pipes:
         self.frict += [frict]
         self.hydrofraced = False
 
-    # set hydraulic aperture limits based on minimum pressure drop at target flow rate
     def Dh_limit(self, Q, dP, rho=980.0, g=9.81, mu=0.9 * cP, k=0.1 * mD):
+        """
+        set hydraulic aperture limits based on minimum pressure drop at target flow rate
+        """
         for i in range(0, self.num):
             if (int(self.typ[i]) in [typ('injector'), typ('producer'), typ('pipe')]):
                 # a_max = (10.7e-5*self.L[i]*rho*g*Q/(dP*self.frict[i]**1.852))**(1.0/4.87) #oldest
@@ -734,20 +825,24 @@ class pipes:
                 exit
 
 
-# model object, functions, and data as object
-class mesh:
+class Mesh:
+    """
+    model object, functions, and data as object
+    """
     def __init__(self):  # ,node=[],pipe=[],fracs=[],wells=[],hydfs=[],bound=[],geo3D=[]): #@@@ are these still used?
         # domain information
-        self.rock = reservoir()
-        self.nodes = nodes()
-        self.pipes = pipes()
+        self.rock = Reservoir()
+        self.nodes = Nodes()
+        self.pipes = Pipes()
         self.fracs = []
         self.wells = []
         self.hydfs = []
         self.bound = []
         self.faces = []
+
         # intersections tracker
         self.trakr = []  # index of fractures in chain
+
         # flow solver
         self.H = []  # boundary pressure head array, m
         self.Q = []  # boundary flow rate array, m3/s
@@ -759,6 +854,7 @@ class mesh:
         self.p_q = []  # constant pressure well rates, m3/s
         self.b_p = []  # boundary pressure, Pa
         self.b_q = []  # boundary rates, m3/s
+
         # heat solver
         self.Tb = []  # boundary temperatures
         self.R0 = []  # thermal radius
@@ -779,12 +875,14 @@ class mesh:
         self.i_mm = []  # mixed injection mass flow rate
         self.p_mm = []  # mixed produced mass flow rate
         self.p_hm = []  # mixed produced enthalpy
+
         # power solver
         self.Fout = []  # flash rankine power out
         self.Bout = []  # binary isobutane power out
         self.Qout = []  # pumping power out
         self.Pout = []  # net power out
         self.dhout = []  # heat extraction
+
         # validation stuff
         self.v_Rs = []
         self.v_ts = []
@@ -835,8 +933,10 @@ class mesh:
     #            #stress states
     #            self.faces[n].Pc, self.faces[n].sn, self.faces[n].tau = self.rock.stress.Pc_frac(self.faces[n].str, self.faces[n].dip, self.faces[n].phi, self.faces[n].mcc)
 
-    # Propped fracture property estimation with geomechanics
     def hydromech(self, f_id, fix=False):  # , pp=-666.0):
+        """
+        Propped fracture property estimation with geomechanics
+        """
         # initialize stim
         stim = False
 
@@ -1742,9 +1842,9 @@ class mesh:
     def re_init(self):
         # clear prior data
         self.nodes = []
-        self.nodes = nodes()
+        self.nodes = Nodes()
         self.pipes = []
-        self.pipes = pipes()
+        self.pipes = Pipes()
         self.faces = []  # all surfaces
         self.faces = self.bound + self.fracs + self.hydfs
         for i in range(0, len(self.faces)):
@@ -2214,12 +2314,12 @@ class mesh:
         size = self.rock.size
         # create boundary faces for analysis
         domb3D = []
-        domb3D += [surf(-size, 0.0, 0.0, 4.0 * size, 00.0 * deg, 90.0 * deg, 'boundary', self.rock)]
-        domb3D += [surf(size, 0.0, 0.0, 4.0 * size, 00.0 * deg, 90.0 * deg, 'boundary', self.rock)]
-        domb3D += [surf(0.0, -size, 0.0, 4.0 * size, 90.0 * deg, 90.0 * deg, 'boundary', self.rock)]
-        domb3D += [surf(0.0, size, 0.0, 4.0 * size, 90.0 * deg, 90.0 * deg, 'boundary', self.rock)]
-        domb3D += [surf(0.0, 0.0, -size, 4.0 * size, 00.0 * deg, 00.0 * deg, 'boundary', self.rock)]
-        domb3D += [surf(0.0, 0.0, size, 4.0 * size, 00.0 * deg, 00.0 * deg, 'boundary', self.rock)]
+        domb3D += [Surface(-size, 0.0, 0.0, 4.0 * size, 00.0 * deg, 90.0 * deg, 'boundary', self.rock)]
+        domb3D += [Surface(size, 0.0, 0.0, 4.0 * size, 00.0 * deg, 90.0 * deg, 'boundary', self.rock)]
+        domb3D += [Surface(0.0, -size, 0.0, 4.0 * size, 90.0 * deg, 90.0 * deg, 'boundary', self.rock)]
+        domb3D += [Surface(0.0, size, 0.0, 4.0 * size, 90.0 * deg, 90.0 * deg, 'boundary', self.rock)]
+        domb3D += [Surface(0.0, 0.0, -size, 4.0 * size, 00.0 * deg, 00.0 * deg, 'boundary', self.rock)]
+        domb3D += [Surface(0.0, 0.0, size, 4.0 * size, 00.0 * deg, 00.0 * deg, 'boundary', self.rock)]
         # add to model domain
         self.bound = domb3D
 
@@ -2241,7 +2341,7 @@ class mesh:
         c0 = np.asarray(c0)
 
         # compile list of fractures
-        frac3D = [surf(c0[0], c0[1], c0[2], dia, azn, dip, 'fracture', self.rock)]
+        frac3D = [Surface(c0[0], c0[1], c0[2], dia, azn, dip, 'fracture', self.rock)]
 
         # print( 'dia = %.1f, azn = %.1f, dip = %.1f' %(dia, azn, dip))
 
@@ -2278,7 +2378,7 @@ class mesh:
             z = np.random.uniform(-size, size)
             c0 = np.asarray([x, y, z])
             # compile list of fractures
-            frac3D += [surf(c0[0], c0[1], c0[2], dia, azn, dip, 'fracture', self.rock)]
+            frac3D += [Surface(c0[0], c0[1], c0[2], dia, azn, dip, 'fracture', self.rock)]
 
         # add to model domain
         self.fracs += frac3D
@@ -2329,8 +2429,8 @@ class mesh:
             c0 = c0 + spa * vAxi
 
             # add to model domain
-            self.hydfs += [surf(c0[0], c0[1], c0[2], leg, azn, dip, 'propped', self.rock, mcc=self.rock.hfmcc,
-                                phi=self.rock.hfphi)]
+            self.hydfs += [Surface(c0[0], c0[1], c0[2], leg, azn, dip, 'propped', self.rock, mcc=self.rock.hfmcc,
+                                   phi=self.rock.hfphi)]
             self.hydfs[-1].bd0 = 0.0
 
     # ************************************************************************
@@ -2397,12 +2497,12 @@ class mesh:
             wells = []
             azn, dip = azn_dip(i1s[0], i2s[0])
             for i in range(0, seg):
-                wells += [line(i1s[i][0], i1s[i][1], i1s[i][2], leg, azn, dip, 'injector',
+                wells += [Line(i1s[i][0], i1s[i][1], i1s[i][2], leg, azn, dip, 'injector',
                                self.rock.ra, self.rock.rb, self.rock.rc, self.rock.rgh)]
             # place production wells
             for i in range(0, num):
                 azn, dip = azn_dip(p1s[i], p2s[i])
-                wells += [line(p1s[i][0], p1s[i][1], p1s[i][2], pLen, azn, dip, 'producer',
+                wells += [Line(p1s[i][0], p1s[i][1], p1s[i][2], pLen, azn, dip, 'producer',
                                self.rock.ra, self.rock.rb, self.rock.rc, self.rock.rgh)]
             # add to model domain
             self.wells = wells
@@ -2419,7 +2519,7 @@ class mesh:
         fleg = np.random.normal(dia[0], dia[1])
         fazn = np.random.normal(azn[0], azn[1])
         fdip = np.random.normal(dip[0], dip[1])
-        self.hydfs += [surf(c0[0], c0[1], c0[2], fleg, fazn, fdip, typ, self.rock)]
+        self.hydfs += [Surface(c0[0], c0[1], c0[2], fleg, fazn, fdip, typ, self.rock)]
 
     # ************************************************************************
     # find intersections
@@ -4097,7 +4197,7 @@ if __name__ == '__main__':  # main program
     #    geo[2]=sg.mergeObj(geo[2], sg.cylObj(x0=np.asarray([0,0,0]), x1=np.asarray([0.1,0,0]), r=0.1))
     #    geo[3]=sg.mergeObj(geo[3], sg.cylObj(x0=np.asarray([0,0,0]), x1=np.asarray([0.1,0,0]), r=0.1))
     #    geo[4]=sg.mergeObj(geo[3], sg.cylObj(x0=np.asarray([0,0,0]), x1=np.asarray([0.1,0,0]), r=0.1))
-    geom = mesh()  # node=mnode,pipe=mpipe,fracs=mfrac,wells=mwell,hydfs=mhydf,bound=mboun,geo3D=geo)
+    geom = Mesh()  # node=mnode,pipe=mpipe,fracs=mfrac,wells=mwell,hydfs=mhydf,bound=mboun,geo3D=geo)
 
     # generate the domain
     geom.gen_domain()
@@ -4134,9 +4234,9 @@ if __name__ == '__main__':  # main program
         wells = []
         # wells += [line(0.0+0.5*spacing[s],-300.0,0.0,600.0,0.0*deg,0.0*deg,'injector',0.2286,80.0)]
         # wells += [line(0.0-0.5*spacing[s],-300.0,0.0,600.0,0.0*deg,0.0*deg,'producer',0.2286,80.0)]
-        wells += [line(0.0 - 1.0 * spacing[s], -300.0, 0.0, 600.0, 0.0 * deg, 0.0 * deg, 'producer', 0.2286, 80.0)]
-        wells += [line(0.0 + 0.0 * spacing[s], -300.0, 0.0, 600.0, 0.0 * deg, 0.0 * deg, 'injector', 0.2286, 80.0)]
-        wells += [line(0.0 + 1.0 * spacing[s], -300.0, 0.0, 600.0, 0.0 * deg, 0.0 * deg, 'producer', 0.2286, 80.0)]
+        wells += [Line(0.0 - 1.0 * spacing[s], -300.0, 0.0, 600.0, 0.0 * deg, 0.0 * deg, 'producer', 0.2286, 80.0)]
+        wells += [Line(0.0 + 0.0 * spacing[s], -300.0, 0.0, 600.0, 0.0 * deg, 0.0 * deg, 'injector', 0.2286, 80.0)]
+        wells += [Line(0.0 + 1.0 * spacing[s], -300.0, 0.0, 600.0, 0.0 * deg, 0.0 * deg, 'producer', 0.2286, 80.0)]
         #        #injection well
         #        wells += [well(300.0,-200.0,0.0, 600.0, 324.0*deg, 0.0*deg,-1,0.2286,80.0)]
         #        #production well

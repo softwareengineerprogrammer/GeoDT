@@ -28,7 +28,7 @@ gal = 1.0/264.172 #m3
 for i in range(0,100):
     #create model object
     geom = []
-    geom = gt.mesh()
+    geom = gt.Mesh()
     
 #        #rock properties
     geom.rock.size = 140.0 #m #!!!
@@ -234,25 +234,25 @@ for i in range(0,100):
     wells = []
     
     #monitoring    
-    wells += [gt.line(5.0282856,51.9184128,-0.931164,49.9872,0,1.570796327,'producer',geom.rock.ra, geom.rock.rgh)]
-    wells += [gt.line(8.019288,53.2199088,0.2785872,10.668,0.788888822,0.093724181,'producer',geom.rock.ra, geom.rock.rgh)]
-    wells += [gt.line(9.0034872,51.1996944,-0.3691128,59.436,1.752310569,0.67718775,'producer',geom.rock.ra, geom.rock.rgh)]
-    wells += [gt.line(9.1452192,51.3560568,0.001524,59.436,1.761037215,0.151843645,'producer',geom.rock.ra, geom.rock.rgh)]
-    wells += [gt.line(-1.00584,41.0135832,-0.3447288,54.864,2.138028334,0.616101226,'producer',geom.rock.ra, geom.rock.rgh)]
-    wells += [gt.line(-1.0107168,41.192196,0.185928,54.864,2.038544566,0.02443461,'producer',geom.rock.ra, geom.rock.rgh)]
+    wells += [gt.Line(5.0282856, 51.9184128, -0.931164, 49.9872, 0, 1.570796327, 'producer', geom.rock.ra, geom.rock.rgh)]
+    wells += [gt.Line(8.019288, 53.2199088, 0.2785872, 10.668, 0.788888822, 0.093724181, 'producer', geom.rock.ra, geom.rock.rgh)]
+    wells += [gt.Line(9.0034872, 51.1996944, -0.3691128, 59.436, 1.752310569, 0.67718775, 'producer', geom.rock.ra, geom.rock.rgh)]
+    wells += [gt.Line(9.1452192, 51.3560568, 0.001524, 59.436, 1.761037215, 0.151843645, 'producer', geom.rock.ra, geom.rock.rgh)]
+    wells += [gt.Line(-1.00584, 41.0135832, -0.3447288, 54.864, 2.138028334, 0.616101226, 'producer', geom.rock.ra, geom.rock.rgh)]
+    wells += [gt.Line(-1.0107168, 41.192196, 0.185928, 54.864, 2.038544566, 0.02443461, 'producer', geom.rock.ra, geom.rock.rgh)]
     
     #injector
     #wells += [gt.line(0,0,0,77.10353424,0.832584549,0.257981302,'injector',geom.rock.ra, geom.rock.rgh)]
     
     #producers
-    wells += [gt.line(-0.6257544,0.4255008,-0.0356616,76.2,0.740019603,0.230383461,'producer',geom.rock.ra, geom.rock.rgh)]
-    wells += [gt.line(-0.7824216,0.4474464,-0.3249168,76.2,0.841248699,0.390953752,'producer',geom.rock.ra, geom.rock.rgh)]
-    wells += [gt.line(0.1679448,-0.4300728,0.0917448,76.2,0.900589894,0.132645023,'producer',geom.rock.ra, geom.rock.rgh)]
-    wells += [gt.line(0.2505456,-0.760476,-0.1063752,80.772,1.007054978,0.287979327,'producer',geom.rock.ra, geom.rock.rgh)]
+    wells += [gt.Line(-0.6257544, 0.4255008, -0.0356616, 76.2, 0.740019603, 0.230383461, 'producer', geom.rock.ra, geom.rock.rgh)]
+    wells += [gt.Line(-0.7824216, 0.4474464, -0.3249168, 76.2, 0.841248699, 0.390953752, 'producer', geom.rock.ra, geom.rock.rgh)]
+    wells += [gt.Line(0.1679448, -0.4300728, 0.0917448, 76.2, 0.900589894, 0.132645023, 'producer', geom.rock.ra, geom.rock.rgh)]
+    wells += [gt.Line(0.2505456, -0.760476, -0.1063752, 80.772, 1.007054978, 0.287979327, 'producer', geom.rock.ra, geom.rock.rgh)]
     
     #drift
-    wells += [gt.line(-4.3290744,-70.1844672,-0.077724,155.7528,0.019024089,0,'producer',geom.rock.ra, geom.rock.rgh)]
-    wells += [gt.line(-2.1954744,51.7355328,-0.077724,11.5824,1.584060829,0,'producer',geom.rock.ra, geom.rock.rgh)]
+    wells += [gt.Line(-4.3290744, -70.1844672, -0.077724, 155.7528, 0.019024089, 0, 'producer', geom.rock.ra, geom.rock.rgh)]
+    wells += [gt.Line(-2.1954744, 51.7355328, -0.077724, 11.5824, 1.584060829, 0, 'producer', geom.rock.ra, geom.rock.rgh)]
     #wells += [gt.line(-1.9211544,85.5073728,-0.077724,77.724,6.119124357,0,'producer',geom.rock.ra, geom.rock.rgh)]
     #wells += [gt.line(-8.5657944,125.4056928,-0.077724,25.908,0.944223125,0,'producer',geom.rock.ra, geom.rock.rgh)]
     #wells += [gt.line(12.4958856,140.6456928,-0.077724,29.8704,5.246459731,0,'producer',geom.rock.ra, geom.rock.rgh)]
@@ -277,9 +277,9 @@ for i in range(0,100):
         x0 = np.asarray([0.0, 0.0, 0.0])
         x1 = x0 + vAxi*(rati_leg*leg - 0.5*zone_leg)
         x2 = x0 + vAxi*(rati_leg*leg + 1.0*zone_leg)
-        wells2 += [gt.line(x0[0],x0[1],x0[2],rati_leg*leg - 1.0*zone_leg,0.832584549,0.257981302,'producer',comm.rock.ra, comm.rock.rgh)]
-        wells2 += [gt.line(x1[0],x1[1],x1[2],1.0*zone_leg,0.832584549,0.257981302,'injector',comm.rock.ra, comm.rock.rgh)]
-        wells2 += [gt.line(x2[0],x2[1],x2[2],leg-(rati_leg*leg + 1.0*zone_leg),0.832584549,0.257981302,'producer',comm.rock.ra, comm.rock.rgh)]
+        wells2 += [gt.Line(x0[0], x0[1], x0[2], rati_leg * leg - 1.0 * zone_leg, 0.832584549, 0.257981302, 'producer', comm.rock.ra, comm.rock.rgh)]
+        wells2 += [gt.Line(x1[0], x1[1], x1[2], 1.0 * zone_leg, 0.832584549, 0.257981302, 'injector', comm.rock.ra, comm.rock.rgh)]
+        wells2 += [gt.Line(x2[0], x2[1], x2[2], leg - (rati_leg * leg + 1.0 * zone_leg), 0.832584549, 0.257981302, 'producer', comm.rock.ra, comm.rock.rgh)]
 
         #install
         comm.wells = wells2

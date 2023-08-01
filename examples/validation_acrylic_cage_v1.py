@@ -23,7 +23,7 @@ mLmin = 1.66667e-8 #m3/s
 # ****************************************************************************
 #create model object
 geom = []
-geom = gt.mesh()
+geom = gt.Mesh()
 
 #rock properties
 geom.rock.size = 0.5*0.1524 #m

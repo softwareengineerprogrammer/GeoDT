@@ -21,7 +21,7 @@ mD = gt.mD
 # ****************************************************************************        
 #create model object
 geom = []
-geom = gt.mesh()
+geom = gt.Mesh()
 
 
 #***** input block settings *****

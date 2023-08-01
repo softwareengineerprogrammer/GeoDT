@@ -24,7 +24,7 @@ mD = gt.mD
 for i in range(0,2500):
     #create model object
     geom = []
-    geom = gt.mesh()
+    geom = gt.Mesh()
 
     #rock properties
     geom.rock.size = 1500.0 #m

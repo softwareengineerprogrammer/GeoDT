@@ -60,7 +60,7 @@ for i in range(0,1):
     
     #create model object
     geom = []
-    geom = gt.mesh()
+    geom = gt.Mesh()
     
     #rock properties
     geom.rock.size = 1600.0 #m                                                  #half-size of the modeling domain

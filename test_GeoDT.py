@@ -4,7 +4,7 @@ from pathlib import Path
 import numpy as np
 import pylab
 
-from GeoDT import mesh
+from GeoDT import Mesh
 
 
 class GeoDTTest(unittest.TestCase):
@@ -16,7 +16,7 @@ class GeoDTTest(unittest.TestCase):
         # ****************************************************************************
         #### test program (i.e. script development)
         # ****************************************************************************
-        geom = mesh()
+        geom = Mesh()
         #    geom.rock.s3Azn = 0.0*deg
         #    geom.rock.s3Dip = 0.0*deg
         #    phi = 30.0*deg

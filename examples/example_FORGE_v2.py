@@ -28,7 +28,7 @@ for i in range(0,100):
     # ****************************************************************************    
     #create model object
     geom = []
-    geom = gt.mesh()
+    geom = gt.Mesh()
     
     #rock properties
     geom.rock.size = 1600.0 #m #!!!
