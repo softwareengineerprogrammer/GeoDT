@@ -110,13 +110,22 @@ def azn_dip(x0, x1):
     return azn, dip
 
 
-def exponential_trunc(nsam, bval=1.0, Mmax=5.0, Mwin=1.0,
-                      prob=0.1):  # random samples from a truncated exponential distribution
+def exponential_trunc(nsam,
+                      bval=1.0,
+                      Mmax=5.0,
+                      Mwin=1.0,
+                      prob=0.1):
+    """
+    random samples from a truncated exponential distribution
+    """
+
     # zero-centered Mcap
     lamba = np.log(10) * bval
     Mcap = (-1.0 / lamba) * np.log(prob / (np.exp(lamba * Mwin) - 1.0 + prob))
+
     # calculated Mmin
     Mmin = Mmax - Mcap
+
     # sample sets with resamples out-of-range values
     s0 = np.random.exponential(1.0 / (np.log(10) * bval), nsam) + Mmin
     iters = 0
@@ -133,13 +142,22 @@ def exponential_trunc(nsam, bval=1.0, Mmax=5.0, Mwin=1.0,
     return s0
 
 
-def contact_trunc(nsam, weight=0.15,
-                  bd_nom=0.002, stddev=0.5 * 0.002,
-                  exp_B=0.5, exp_C=0.5 / np.pi,
-                  bd_min=0.0001, bd_max=3.0 * 0.002):  # get random samples from a 'contact' distribution
+def contact_trunc(nsam,
+                  weight=0.15,
+                  bd_nom=0.002,
+                  stddev=0.5 * 0.002,
+                  exp_B=0.5,
+                  exp_C=0.5 / np.pi,
+                  bd_min=0.0001,
+                  bd_max=3.0 * 0.002):
+    """
+    get random samples from a 'contact' distribution
+    """
+
     # binomial samples
     n1 = np.random.binomial(nsam, weight, (1))
     n2 = nsam - n1
+
     # exponential samples
     s1 = np.random.exponential(exp_B, n1) * exp_C * bd_nom + bd_min
     iters = 0
@@ -153,6 +171,7 @@ def contact_trunc(nsam, weight=0.15,
             break
         if iters > 100:
             break
+
     # normal samples
     s2 = np.random.normal(bd_nom, stddev, n2)
     iters = 0
@@ -171,7 +190,11 @@ def contact_trunc(nsam, weight=0.15,
 
 
 def lognorm_trunc(nsam, logmu=0.0, logdev=1.0,
-                  loglo=-2.0, loghi=2.0):  # get random samples from a log normal distribution
+                  loglo=-2.0, loghi=2.0):
+    """
+    get random samples from a log normal distribution
+    """
+
     # normal samples
     s0 = np.random.normal(logmu, logdev, nsam)
     iters = 0
@@ -185,11 +208,19 @@ def lognorm_trunc(nsam, logmu=0.0, logdev=1.0,
             break
         if iters > 100:
             break
+
     return 10.0 ** s0
 
 
-def norm_trunc(nsam, mu=0.0, dev=1.0,
-               lo=-2.0, hi=2.0):  # get random samples from a log normal distribution
+def norm_trunc(nsam,
+               mu=0.0,
+               dev=1.0,
+               lo=-2.0,
+               hi=2.0):
+    """
+    get random samples from a log normal distribution
+    """
+
     # normal samples
     s0 = np.random.normal(mu, dev, nsam)
     iters = 0
