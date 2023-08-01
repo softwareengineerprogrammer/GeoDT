@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import iapws.iapws97
+
 print('GeoDT_3.8.3')
 
 # ****************************************************************************
@@ -6,8 +8,8 @@ print('GeoDT_3.8.3')
 # Author: Luke P. Frash
 #
 # Notation:
-#  !!! for code needing to be updated (e.g, limititations or work in progress)
-#  *** for breaks betweeen key sections
+#  !!! for code needing to be updated (e.g, limitations or work in progress)
+#  *** for breaks between key sections
 # ****************************************************************************
 
 # ****************************************************************************
@@ -526,6 +528,7 @@ class Surface:
     """
     surface object
     """
+
     def __init__(self, x0=0.0, y0=0.0, z0=0.0, dia=1.0, stk=0.0 * deg, dip=90.0 * deg,
                  ty='fracture', rock=Reservoir(),
                  mcc=-1, phi=-1):
@@ -563,7 +566,7 @@ class Surface:
         self.prop_alpha = norm_trunc(1, rock.prop_alpha[1], rock.prop_alpha[1], rock.prop_alpha[0], rock.prop_alpha[2])[
             0]  # proppant compressibility modulus
         self.roughness = rock.f_roughness if type(rock.f_roughness) is float else \
-        np.random.uniform(rock.f_roughness[0], rock.f_roughness[2], (1))[0]  # open flow roughness
+            np.random.uniform(rock.f_roughness[0], rock.f_roughness[2], (1))[0]  # open flow roughness
         self.kf = rock.kf  # proppant pack permeability
 
         # scaling
@@ -578,12 +581,12 @@ class Surface:
 
         # *** stochastic sampled parameters *** #!!!
         self.u_gamma = \
-        lognorm_trunc(1, np.log10(rock.gamma[1]), 0.45, np.log10(rock.gamma[0]), np.log10(rock.gamma[2]))[0]
+            lognorm_trunc(1, np.log10(rock.gamma[1]), 0.45, np.log10(rock.gamma[0]), np.log10(rock.gamma[2]))[0]
         self.u_n1 = np.random.uniform(rock.n1[0], rock.n1[2], (1))[0]
         self.u_a = norm_trunc(1, rock.a[1], 0.150, rock.a[0], rock.a[2])[0]
         self.u_b = np.random.uniform(rock.b[0], rock.b[2], (1))[0]
         self.u_N = \
-        contact_trunc(1, 0.15, rock.N[1], 0.5 * rock.N[1], 0.5, 0.5 * rock.N[1] / np.pi, rock.N[0], rock.N[2])[0]
+            contact_trunc(1, 0.15, rock.N[1], 0.5 * rock.N[1], 0.5, 0.5 * rock.N[1] / np.pi, rock.N[0], rock.N[2])[0]
         self.u_alpha = norm_trunc(1, rock.alpha[1], rock.alpha[1], rock.alpha[0], rock.alpha[2])[0]
         self.bh = norm_trunc(1, rock.bh[1], rock.bh[1], rock.bh[0], rock.bh[2])[
             0]  # !!! would be nice to replace this with a physics based estimate
@@ -717,6 +720,7 @@ class Line:
     """
     line objects
     """
+
     def __init__(self,
                  x0=0.0,
                  y0=0.0,
@@ -729,7 +733,6 @@ class Line:
                  rb=0.0254 * 3.5,
                  rc=0.0254 * 3.5,
                  rough=80.0):
-
         # position geometry
         self.c0 = np.asarray([x0, y0, z0])  # origin
         self.leg = length  # length
@@ -860,6 +863,7 @@ class Mesh:
     """
     model object, functions, and data as object
     """
+
     def __init__(self):  # ,node=[],pipe=[],fracs=[],wells=[],hydfs=[],bound=[],geo3D=[]): #@@@ are these still used?
         # domain information
         self.rock = Reservoir()
@@ -1020,7 +1024,7 @@ class Mesh:
             self.faces[f_id].arup = np.max([self.faces[f_id].arup - 0.25 * np.pi * Lr ** 2.0, 0.1])
             # update rupture area
             self.faces[f_id].arup = self.faces[f_id].arup + 0.25 * np.pi * (
-                        (self.faces[f_id].dia + add_dia) ** 2.0 - self.faces[f_id].dia ** 2.0)
+                    (self.faces[f_id].dia + add_dia) ** 2.0 - self.faces[f_id].dia ** 2.0)
             # update fracture size
             self.faces[f_id].dia += add_dia
 
@@ -1276,8 +1280,14 @@ class Mesh:
         out += [['bh_min', r.bh_min]]
         out += [['bh_max', r.bh_max]]
         out += [['bh_bound', r.bh_bound]]
+
+        # TODO verify that treating single float value as array of that value is OK/correct
+        out_roughness = r.f_roughness
+        if type(out_roughness) is float:
+            out_roughness = [out_roughness] * 3
         for i in range(0, 3):
-            out += [['f_roughness%i' % (i), r.f_roughness[i]]]
+            out += [[f'f_roughness{i}', out_roughness[i]]]
+
         out += [['w_count', r.w_count]]
         out += [['w_spacing', r.w_spacing]]
         out += [['w_length', r.w_length]]
@@ -1977,7 +1987,7 @@ class Mesh:
         return so_n, ta_n
 
     # intersections of lines with lines
-    def x_well_wells():
+    def x_well_wells(self):
         pass
 
     # intersections of a line with a plane
@@ -2642,6 +2652,7 @@ class Mesh:
             s5 = state.s  # kJ/kg-K
             x5 = state.x  # steam quality
             v5 = state.v  # m3/kg
+
             # Undisturbed Reservoir (r)
             Tr = self.rock.BH_T  # K
             Pr = self.rock.BH_P / MPa  # MPa
@@ -2650,6 +2661,7 @@ class Mesh:
             sr = state.s  # kJ/kg-K
             xr = state.x  # steam quality
             vr = state.v  # m3/kg
+
             # Surface Production Well (2)
             P2 = self.rock.p_whp / MPa  # MPa
             h2 = self.p_hm[t]  # kJ/kg
@@ -2658,6 +2670,7 @@ class Mesh:
             s2 = state.s  # kJ/kg-K
             x2 = state.x  # steam quality
             v2 = state.v  # m3/kg
+
             # Brine Flow Stream (2l)
             state = therm(P=P2, x=0)
             P2l = state.P  # MPa
@@ -2666,6 +2679,7 @@ class Mesh:
             s2l = state.s  # kJ/kg-K
             x2l = state.x  # steam quality
             v2l = state.v  # m3/kg
+
             # turbine with error handling
             P3s = self.rock.AmbPres / MPa
             if x2 > 0.0:
@@ -2677,9 +2691,23 @@ class Mesh:
                 s2s = state.s  # kJ/kg-K
                 x2s = state.x  # steam quality
                 v2s = state.v  # m3/kg
+
                 # Turbine Outflow (3s)
                 s3s = s2s
-                state = therm(P=P3s, s=s3s)
+                try:
+                    state = therm(P=P3s, s=s3s)
+                except NotImplementedError as nie:
+                    if P3s < iapws.iapws97.Pmin:
+                        # TODO verify that skipping when P3s < iapws97.Pmin is OK/correct
+                        print(
+                            f'[WARN] Failed to recalculate state for Turbine Outflow (3s) because pressure ({P3s}) '
+                            + f'is below IAPWS minimum pressure ({iapws.iapws97.Pmin}). '
+                            + 'Skipping recalculation and using existing state.'
+                        )
+                    else:
+                        # Re-raise since we don't know the cause
+                        raise nie
+
                 P3s = state.P  # MPa
                 h3s = state.h  # kJ/kg
                 T3s = state.T  # K
@@ -2693,6 +2721,7 @@ class Mesh:
                 s2s = state.s  # kJ/kg-K
                 x2s = state.x  # steam quality
                 v2s = state.v  # m3/kg
+
                 # Turbine Outflow (3s)
                 P3s = state.P  # MPa
                 h3s = state.h  # kJ/kg
@@ -2700,6 +2729,7 @@ class Mesh:
                 s3s = state.s  # kJ/kg-K
                 x3s = state.x  # steam quality
                 v3s = state.v  # m3/kg
+
             # Condenser Outflow (4s)
             P4s = P3s
             T4s = T5
@@ -2710,19 +2740,24 @@ class Mesh:
             s4s = state.s  # kJ/kg-K
             x4s = state.x  # steam quality
             v4s = state.v  # m3/kg
+
             # Turbine Work
             w3s = h2s - h3s  # kJ/kg
+
             # Pump Work
             w5s = v5 * (P5 - P4s) * 10 ** 3  # kJ/kg
             w5l = v5 * (P5 - P2l) * 10 ** 3  # kJ/kg
+
             # efficiency shorthand
             effic = self.rock.GenEfficiency
+
             # Mass flow rates
             mt = -self.p_mm
             ms = mt * x2
             ml = mt * (1.0 - x2)
             mi = self.i_mm
             Vt = (v5 * mt) * (1000 * 60)  # L/min
+
             # Pumping power
             Pump = 0.0
             if mi > mt:
@@ -2731,11 +2766,14 @@ class Mesh:
                 Pump = -1.0 * (mi * w5l) / effic  # kW
             else:
                 Pump = -1.0 * ((mi - ml) * w5s + ml * w5l) / effic  # kW
+
             # Flash cycle power
             Flash = 0.0  # kW
             Flash = ms * np.max([0.0, w3s]) * effic  # kW
+
             # Binary cycle power
             Binary = 0.0
+
             # Outlet thermal state
             TBo = np.max([T5, 51.85 + 273.15])
             PBo = np.min([P3s, P2])
@@ -2743,33 +2781,41 @@ class Mesh:
             PBo = state.P  # MPa
             hBo = state.h  # kJ/kg
             TBo = state.T  # K
+
             # Binary Cycle Inlet from Turbine
             TBis = T3s
             PBis = P3s
             hBis = h3s
+
             # Binary Cycle Inlet from Brine
             TBil = np.min([T2l, T2])
             PBil = P2l
             hBil = np.min([h2l, h2])
-            # Binary thermal-electric efficiency (estimated from Heberle and Bruggermann, 2010 - Fig. 4 - doi:10.1016/j.applthermaleng.2010.02.012)
+
+            # Binary thermal-electric efficiency
+            # (estimated from Heberle and Bruggermann, 2010 - Fig. 4 - doi:10.1016/j.applthermaleng.2010.02.012)
             nBs = np.max([0.0, 0.0899 * TBis - 25.95]) / 100.0
             nBl = np.max([0.0, 0.0899 * TBil - 25.95]) / 100.0
             Binary = (ms * nBs * np.max([0.0, hBis - hBo]) + ml * nBl * np.max(
                 [0.0, hBil - hBo])) * effic  # kW, power produced from binary cycle
+
             # Net power
             Net = 0.0
             Net = Flash + Binary + Pump
+
             # Record results
             Flash_Power += [Flash]
             Binary_Power += [Binary]
             Pump_Power += [Pump]
             Net_Power += [Net]
+
         # record results
         self.Fout = np.asarray(Flash_Power)
         self.Bout = np.asarray(Binary_Power)
         self.Qout = np.asarray(Pump_Power)
         self.Pout = np.asarray(Net_Power)
-        # print( details)
+
+        # print(details)
         if detail:
             print('\n*** Rankine Cycle Thermal State Values ***')
             print(("Inject (5): T= %.2f; P= %.2f; h= %.2f, s= %.4f, x= %.4f, v= %.6f" % (T5, P5, h5, s5, x5, v5)))
@@ -2781,9 +2827,9 @@ class Mesh:
             print(("Conde (4s): T= %.2f; P= %.2f; h= %.2f, s= %.4f, x= %.4f, v= %.6f" % (T4s, P4s, h4s, s4s, x4s, v4s)))
             print('*** Binary Cycle Thermal State Values ***')
             print(("Steam: Ti= %.2f; Pi= %.2f; hi= %.2f -> To= %.2f, Po= %.2f, ho= %.2f, n =%.3f" % (
-            TBis, PBis, hBis, TBo, PBo, hBo, nBs)))
+                TBis, PBis, hBis, TBo, PBo, hBo, nBs)))
             print(("Brine: Ti= %.2f; Pi= %.2f; hi= %.2f -> To= %.2f, Po= %.2f, ho= %.2f, n =%.3f" % (
-            TBil, PBil, hBil, TBo, PBo, hBo, nBl)))
+                TBil, PBil, hBil, TBo, PBo, hBo, nBl)))
             print('*** Power Output Estimation ***')
             print("Turbine Flow Rate = %.2f kg/s" % (ms))
             print("Bypass Flow Rate = %.2f kg/s" % (ml))
@@ -2966,7 +3012,7 @@ class Mesh:
             iters += 1
             if iters > max_iters:
                 print('-> Flow solver halted with error of <%.2e m head after %i iterations' % (
-                np.max(np.abs(z)), iters - 1))
+                    np.max(np.abs(z)), iters - 1))
                 break
             elif (np.max(np.abs(z)) < goal):  # np.max(np.abs(z/(h+z))) < goal:
                 print('-> Flow solver converged to <%.2e m head using %i iterations' % (goal, iters - 1))
@@ -3192,7 +3238,7 @@ class Mesh:
         Ror = np.linspace(1, 2000, 2000)  # (BoreOR,200,100)
         ERor = 2 * pi * ResSv * 1.0 * ((1 - np.log(Rir) / np.log(Rir / Ror)) * (Ror ** 2 - Rir ** 2) / 2
                                        + (1 / (2 * np.log(Rir / Ror))) * (
-                                                   Ror ** 2 * (np.log(Ror) - 0.5) - Rir ** 2 * (np.log(Rir) - 0.5)))
+                                               Ror ** 2 * (np.log(Ror) - 0.5) - Rir ** 2 * (np.log(Rir) - 0.5)))
         lnRor = np.log(Ror[:])
         lnERor = np.log(ERor[:])
         ERm, ERb, r_value, p_value, std_err = stats.linregress(lnERor,
@@ -3270,8 +3316,8 @@ class Mesh:
                             R0[p] = np.exp(ERm * (np.log(np.abs(Etp / (Lp[p] * dT)))) + ERb) + Rir  # m
                             # initial rock energy transfer rates
                             Qt[t, p] = Lp[p] / (1.0 / (2.0 * pi * Ris * H) + np.log(R0[p] / Rir) / (
-                                        2.0 * pi * ResKt * 10 ** -3) + np.log(Rir / Ric) / (
-                                                            2.0 * pi * CemKt * 10 ** -3))  # kJ/K-s
+                                    2.0 * pi * ResKt * 10 ** -3) + np.log(Rir / Ric) / (
+                                                        2.0 * pi * CemKt * 10 ** -3))  # kJ/K-s
                         elif (int(self.pipes.typ[p]) in [typ('boundary'), typ('fracture'), typ('propped'), typ('darcy'),
                                                          typ('choke')]):  # fracture, plate heat flow
                             # rock energy withdraw
@@ -3284,7 +3330,7 @@ class Mesh:
                             R0[p] = Etp / (ResSv * self.pipes.W[p] * Lp[p] * dT)  # m
                             # rock energy transfer rates
                             Qt[t, p] = (2.0 * self.pipes.W[p] * Lp[p]) / (
-                                        1.0 / (H) + R0[p] / (ResKt * 10 ** -3))  # kJ/K-s
+                                    1.0 / (H) + R0[p] / (ResKt * 10 ** -3))  # kJ/K-s
                         else:
                             print('error: segment type %s not identified' % (
                                 typ(int(self.pipes.typ[p]))))  # !!! edit 9-13-2022 end
@@ -3409,8 +3455,8 @@ class Mesh:
                         R0[i] = np.exp(ERm * (np.log(np.abs(Et[t + 1, i] / (Lp[i] * dT)))) + ERb) + Rir  # +2.0*Rir # m
                     # Et[0,i] = np.exp((np.log(R0[i])-ERb)/ERm)*Lp[i]*(Tr-0.5*(Tn[Y[i][1]]+Tn[Y[i][0]])) # kJ
                     Qt[t + 1, i] = Lp[i] / (1.0 / (2.0 * pi * Ris * H) + np.log(R0[i] / Rir) / (
-                                2.0 * pi * ResKt * 10 ** -3) + np.log(Rir / Ric) / (
-                                                        2.0 * pi * CemKt * 10 ** -3))  # kJ/K-s # Note converted Kt in W/m-K to kW/m-K
+                            2.0 * pi * ResKt * 10 ** -3) + np.log(Rir / Ric) / (
+                                                    2.0 * pi * CemKt * 10 ** -3))  # kJ/K-s # Note converted Kt in W/m-K to kW/m-K
 
                 elif (int(self.pipes.typ[i]) in [typ('boundary'), typ('fracture'), typ('propped'), typ('darcy'),
                                                  typ('choke')]):  # fracture, plate heat flow
@@ -3418,7 +3464,7 @@ class Mesh:
                         R0[i] = Et[t + 1, i] / (ResSv * self.pipes.W[i] * Lp[i] * dT)
                     # Et[0,i] = ResSv*R0[i]*Y[i][4]*Lp[i]*(Tr-0.5*(Tn[Y[i][1]]+Tn[Y[i][0]])) # kJ
                     Qt[t + 1, i] = (2.0 * self.pipes.W[i] * Lp[i]) / (
-                                1.0 / (H) + R0[i] / (ResKt * 10 ** -3))  # kJ/K-s # Note converted Kt in W/m-K to kW/m-K
+                            1.0 / (H) + R0[i] / (ResKt * 10 ** -3))  # kJ/K-s # Note converted Kt in W/m-K to kW/m-K
                 else:
                     print('error: segment type %s not identified' % (typ(int(self.pipes.typ[i]))))
 
@@ -3846,7 +3892,7 @@ class Mesh:
                     elif ((nat_stim == False) or (((int(num_stim) + 1) % int(self.rock.stim_limit)) == 0)):
                         dpi[i] += self.rock.dPi
                         print('   + (%i) pressure increased to %.3f, %.3f absolute' % (
-                        i, self.rock.s3 + dpi[i], tip[i] + dpi[i]))
+                            i, self.rock.s3 + dpi[i], tip[i] + dpi[i]))
                     if visuals:
                         t += [time_step]
                         P += [tip[i]]
@@ -4079,10 +4125,10 @@ class Mesh:
 
                 # scaled aperture (ohmega_bar_m0) and scaled pressure (pi_m0)
                 scaled_aper = (((0.6846 * 70.0 ** 0.5) / 3.0 + (13.0 * rho[p] - 6.0) * (
-                            0.07098 * 4.0 * 5.0 ** 0.5) / 9.0) * (1.0 - rho[p]) ** (2.0 / 3.0) +
+                        0.07098 * 4.0 * 5.0 ** 0.5) / 9.0) * (1.0 - rho[p]) ** (2.0 / 3.0) +
                                0.09269 * ((1.0 - rho[p]) ** 0.5 * 8.0 / pi - np.arccos(rho[p]) * rho[p] * 8.0 / pi))
                 scaled_pres = 0.3581 * (2.479 - 2.0 / (3.0 * (1.0 - rho[p]) ** (1.0 / 3.0))) - 0.09269 * (
-                            np.log(rho[p] / 2.0) + 1.0)
+                        np.log(rho[p] / 2.0) + 1.0)
 
                 sca_Kscas += [K_scaled]
                 sca_apers += [scaled_aper]
