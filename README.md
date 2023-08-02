@@ -43,11 +43,11 @@ If you do not set up virtualenv, you will need to ensure that the dependencies i
 in global site-packages (`pip install -r requirements.txt`)
 
 ### Steps
-1. Pick an example script from `examples/` and copy it to the main directory
+1. Pick an example script from `examples/`:
     - `validation_` files generally specify deterministic geometries and boundary conditions
     - `example_` files are generally stochastic multi-run models that focus on EGS design optimization
-1. Set your python working directory to a location where you want the output files to be created, i.e. `mkdir -p build && rm build/*`
-1. Run the example script i.e. `cd build && python ../example_datathon_2023.py`
+1. Softlink or copy from package root to script i.e. `ln -s examples/validation_2inj_2pro_2nf.py validation_2inj_2pro_2nf.py` or `cp examples/validation_2inj_2pro_2nf.py .` 
+1. Run the example script i.e. `python validation_2inj_2pro_2nf.py`
 1. View the result `.vtk` files using a compatible visualization software (e.g., [ParaView](https://www.paraview.org/))
 1. Inspect the example script and edit as needed to customize to your modeling goals
 

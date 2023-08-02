@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import pylab
 
 import GeoDT as gt
+import geodt_utils
 
 from GeoDT import deg as deg
 from GeoDT import MPa as MPa
@@ -17,6 +18,14 @@ from GeoDT import GPa as GPa
 from GeoDT import yr as yr
 from GeoDT import cP as cP
 from GeoDT import mD as mD
+
+# random identifier (statistically should be unique)
+pin = geodt_utils.generate_pin()
+
+
+def build_path(file_name):
+    return geodt_utils.build_path(pin, file_name)
+
 
 # ****************************************************************************
 #### model setup
@@ -54,6 +63,7 @@ geom.rock.fStr = np.asarray([[351.0 * deg, 15.0 * deg],
 geom.rock.fDip = np.asarray([[80.0 * deg, 7.0 * deg],
                              [48.0 * deg, 7.0 * deg, ],
                              [64.0 * deg, 7.0 * deg]], dtype=float)  # m
+
 # fracture hydraulic parameters
 geom.rock.gamma = np.asarray([10.0 ** -3.0, 10.0 ** -2.0, 10.0 ** -1.2])
 geom.rock.n1 = np.asarray([1.0, 1.0, 1.0])
@@ -67,6 +77,7 @@ geom.rock.bh_min = 0.0030001  # 0.00005 #m #!!!
 geom.rock.bh_max = 0.003  # 0.01 #m #!!!
 geom.rock.bh_bound = 0.001  # !!!
 geom.rock.f_roughness = 0.8  # np.random.uniform(0.7,1.0)
+
 # well parameters
 geom.rock.w_count = 1  # 2 #wells
 geom.rock.w_spacing = 300.0  # m
@@ -80,9 +91,11 @@ geom.rock.w_skew = 0.0 * deg  # rad
 geom.rock.w_intervals = 1  # breaks in well length
 geom.rock.ra = 0.0254 * 5.0  # 0.0254*3.0 #m
 geom.rock.rgh = 80.0
+
 # cement properties
 geom.rock.CemKt = 2.0  # W/m-K
 geom.rock.CemSv = 2000.0  # kJ/m3-K
+
 # thermal-electric power parameters
 geom.rock.GenEfficiency = 0.85  # kWe/kWt
 geom.rock.LifeSpan = 20.5 * yr  # years
@@ -92,11 +105,13 @@ geom.rock.Tinj = 95.0  # C
 geom.rock.H_ConvCoef = 3.0  # kW/m2-K #!!!
 geom.rock.dT0 = 10.0  # K
 geom.rock.dE0 = 500.0  # kJ/m2
+
 # water base parameters
 geom.rock.PoreRho = 980.0  # kg/m3 starting guess #!!!
 geom.rock.Poremu = 0.25 * cP  # Pa-s #!!!
 geom.rock.Porek = 0.1 * mD  # m2
 geom.rock.Frack = 100.0 * mD  # m2
+
 # stimulation parameters
 if geom.rock.w_intervals == 1:
     geom.rock.perf = int(np.random.uniform(1, 1))
@@ -145,30 +160,27 @@ geom.fracs[-1].bh = 0.003
 # setup internal variables for solver
 geom.re_init()
 
-# random identifier (statistically should be unique)
-pin = np.random.randint(100000000, 999999999, 1)[0]
-
 # stimulate
 # geom.dyn_stim(Vinj=geom.rock.Vstim,Qinj=geom.rock.Qstim,target=[],
 #              visuals=False,fname='stim')
 
 # flow
 geom.dyn_stim(Vinj=geom.rock.Vinj, Qinj=geom.rock.Qinj, target=[],
-              visuals=False, fname='run_%i' % (pin))
+              visuals=False, fname=f'run_{pin}')
 
 # heat flow
 geom.get_heat(plot=True)
-plt.savefig('plt_%i.png' % (pin), format='png')
+plt.savefig(f'plt_{pin}.png', format='png')
 plt.close()
 
 # show flow model
-geom.build_vtk(fname='fin_%i' % (pin))
+geom.build_vtk(fname=f'fin_{pin}')
 
 # save primary inputs and outputs
-x = geom.save('inputs_results_valid.txt', pin, printwells=2)
+x = geom.save(build_path('inputs_results_valid.txt'), pin, printwells=2)
 
 if True:  # 3D temperature visual
-    geom.build_pts(spacing=20.0, fname='fin_%i' % (pin))
+    geom.build_pts(spacing=20.0, fname=f'fin_{pin}')
 
 # stereoplot
 # geom.rock.stress.plot_Pc(geom.rock.phi[1], geom.rock.mcc[1], filename='Pc_stereoplot.png')

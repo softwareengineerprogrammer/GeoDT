@@ -5,10 +5,6 @@
 # ****************************************************************************
 #### standard imports
 # ****************************************************************************
-from pathlib import Path
-import os
-import time
-
 import numpy as np
 import matplotlib.pyplot as plt
 import pylab
@@ -22,21 +18,14 @@ from GeoDT import yr as yr
 from GeoDT import cP as cP
 from GeoDT import mD as mD
 
+import geodt_utils
+
 # random identifier
-pin = int(time.time())
+pin = geodt_utils.generate_pin()
 
 
 def build_path(file_name):
-    output_dir = Path(
-        'build',
-        Path(__file__).name.replace('.py', ''),
-        str(pin)
-    )
-
-    if not output_dir.exists():
-        os.makedirs(output_dir)
-
-    return str(Path(output_dir, file_name))
+    return geodt_utils.build_path(pin, file_name)
 
 
 # ****************************************************************************
