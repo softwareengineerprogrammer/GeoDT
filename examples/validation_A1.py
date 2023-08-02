@@ -189,4 +189,4 @@ x = geom.save(build_path('inputs_results_valid.txt'), pin)
 # geom.detournay_visc(geom.rock.Qstim)
 
 # show plots
-pylab.show()
+pylab.show(block=False)

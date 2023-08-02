@@ -166,7 +166,7 @@ geom.re_init()
 
 # flow
 geom.dyn_stim(Vinj=geom.rock.Vinj, Qinj=geom.rock.Qinj, target=[],
-              visuals=False, fname=f'run_{pin}')
+              visuals=False, fname=build_path(f'run_{pin}'))
 
 # heat flow
 geom.get_heat(plot=True)
@@ -189,4 +189,4 @@ if True:  # 3D temperature visual
 # geom.detournay_visc(geom.rock.Qstim)
 
 # show plots
-pylab.show()
+pylab.show(block=False)
