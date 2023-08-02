@@ -46,7 +46,7 @@ in global site-packages (`pip install -r requirements.txt`)
 1. Pick an example script from `examples/`:
     - `validation_` files generally specify deterministic geometries and boundary conditions
     - `example_` files are generally stochastic multi-run models that focus on EGS design optimization
-1. Softlink or copy from package root to script i.e. `ln -s examples/validation_2inj_2pro_2nf.py validation_2inj_2pro_2nf.py` or `cp examples/validation_2inj_2pro_2nf.py .` 
+1. Softlink or copy from package root to script i.e. `ln -s examples/validation_2inj_2pro_2nf.py` or `cp examples/validation_2inj_2pro_2nf.py .` 
 1. Run the example script i.e. `python validation_2inj_2pro_2nf.py`
 1. View the result `.vtk` files using a compatible visualization software (e.g., [ParaView](https://www.paraview.org/))
 1. Inspect the example script and edit as needed to customize to your modeling goals

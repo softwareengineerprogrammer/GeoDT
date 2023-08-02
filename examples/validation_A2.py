@@ -179,7 +179,8 @@ geom.build_vtk(fname=f'fin_{pin}')
 # save primary inputs and outputs
 x = geom.save(build_path('inputs_results_valid.txt'), pin, printwells=2)
 
-if True:  # 3D temperature visual
+enable_3d_temperature_visual = True
+if enable_3d_temperature_visual:
     geom.build_pts(spacing=20.0, fname=f'fin_{pin}')
 
 # stereoplot
