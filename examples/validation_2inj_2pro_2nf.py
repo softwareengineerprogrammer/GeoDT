@@ -1,27 +1,42 @@
 # ****************************************************************************
 #### validation: two inj two pro two natfrac
 # ****************************************************************************
-from pathlib import Path
 
 # ****************************************************************************
 #### standard imports
 # ****************************************************************************
+from pathlib import Path
+import os
+import time
+
 import numpy as np
 import matplotlib.pyplot as plt
-import GeoDT as gt
 import pylab
-import uuid
 
-deg = gt.deg
-MPa = gt.MPa
-GPa = gt.GPa
-yr = gt.yr
-cP = gt.cP
-mD = gt.mD
+import GeoDT as gt
+
+from GeoDT import deg as deg
+from GeoDT import MPa as MPa
+from GeoDT import GPa as GPa
+from GeoDT import yr as yr
+from GeoDT import cP as cP
+from GeoDT import mD as mD
+
+# random identifier
+pin = int(time.time())
 
 
 def build_path(file_name):
-    return str(Path('build', file_name))
+    output_dir = Path(
+        'build',
+        Path(__file__).name.replace('.py', ''),
+        str(pin)
+    )
+
+    if not output_dir.exists():
+        os.makedirs(output_dir)
+
+    return str(Path(output_dir, file_name))
 
 
 # ****************************************************************************
@@ -169,9 +184,6 @@ geom.gen_fixfrac(False, c0, dia, strike, dip)
 wells = []
 geom.gen_wells(True, wells)
 
-# random identifier
-pin = uuid.uuid4()
-
 # stimulate
 # geom.dyn_stim(Vinj=geom.rock.Vstim,Qinj=geom.rock.Qstim,target=[],
 #   visuals=False,fname='stim')
@@ -196,7 +208,7 @@ if enable_3d_temperature_visual:
     geom.build_pts(spacing=50.0, fname=build_path(f'fin_{pin}'))
 
 # save primary inputs and outputs
-x = geom.save(build_path('inputs_results_valid.txt'), pin)
+x = geom.save(build_path('inputs_results_valid.txt'), int(pin))
 
 # show plots
 pylab.show()
