@@ -21,7 +21,7 @@ from scipy.linalg import solve
 import pylab
 import math
 from iapws import IAPWS97 as therm
-from libs import SimpleGeometry as sg
+import SimpleGeometry as sg
 from scipy import stats
 
 # import sys
