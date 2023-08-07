@@ -1,10 +1,7 @@
 # ****************************************************************************
-#### Datathon 2023 example script - Luke Frash using data from Aleta Finnila
+# Datathon 2023 example script - Luke Frash using data from Aleta Finnila
 # ****************************************************************************
 
-# ****************************************************************************
-#### standard imports
-# ****************************************************************************
 from pathlib import Path
 
 import numpy as np
@@ -12,6 +9,8 @@ import matplotlib.pyplot as plt
 import GeoDT as gt
 import pylab
 import copy
+
+import geodt_utils
 
 # units (standard will be: N, m, kg, s, K, Pa, etc.)
 from GeoDT import deg as deg
@@ -25,10 +24,8 @@ from GeoDT import um2cm as um2cm
 
 gal = 1.0 / 264.172  # m3
 
-import geodt_utils
-
 # ****************************************************************************
-#### import your fracture geometry interpreted from microseismic + more #!!!
+# import your fracture geometry interpreted from microseismic + more #!!!
 # ****************************************************************************
 # read in the data
 data = np.recfromcsv(
@@ -40,7 +37,8 @@ data = np.recfromcsv(
     names=True
 )
 
-# correct orientation to GeoDT expected definitions (Azimuth north strike, dip 90 degrees clockwise from strike, dip down from horizon)
+# correct orientation to GeoDT expected definitions
+# (Azimuth north strike, dip 90 degrees clockwise from strike, dip down from horizon)
 strikes = (data['Trend[deg]'] + 90.0) * deg
 dips = (90.0 - data['Plunge[deg]']) * deg
 # strikes = (data['Strike[deg]'])*deg
@@ -56,7 +54,7 @@ alphas = data['Compressibility[1/kPa]'] * 10.0 ** -3.0
 # global parameter uncertainty randomizer & site specifications
 for i in range(0, 1):
     # ****************************************************************************
-    #### model setup: UTAH FORGE --- DATA FROM MULTIPLE SOURCES
+    # model setup: UTAH FORGE --- DATA FROM MULTIPLE SOURCES
     # ****************************************************************************
     # generate pin
     pin = np.random.randint(100000000, 999999999, 1)[0]
@@ -67,7 +65,6 @@ for i in range(0, 1):
 
 
     # create model object
-    geom = []
     geom = gt.Mesh()
 
     # rock properties
@@ -87,6 +84,7 @@ for i in range(0, 1):
     geom.rock.s3AznVar = 1.0 * deg
     geom.rock.s3Dip = np.random.uniform(-10.0, 10.0) * deg  # np.random.uniform(-20.0,20.0)*deg
     geom.rock.s3DipVar = 1.0 * deg
+
     # fracture orientation parameters #[i,:] set, [0,0:2] min, max --or-- nom, std #!!!
     # geom.rock.fNum = np.asarray([int(np.random.uniform(0,35)),
     #                         int(np.random.uniform(0,60)),
@@ -103,7 +101,9 @@ for i in range(0, 1):
     geom.rock.fDip = np.asarray([[80.0 * deg, 6.0 * deg],
                                  [48.0 * deg, 6.0 * deg, ],
                                  [64.0 * deg, 6.0 * deg]], dtype=float)  # m
-    # fracture hydraulic parameters #no data from FORGE available to populate fracture scaling parameters so universal values are applied
+
+    # fracture hydraulic parameters
+    # no data from FORGE available to populate fracture scaling parameters so universal values are applied
     geom.rock.gamma = np.asarray([10.0 ** -3.0, 10.0 ** -2.0, 10.0 ** -1.2])
     geom.rock.n1 = np.asarray([1.0, 1.0, 1.0])
     geom.rock.a = np.asarray([0.000, 0.200, 0.800])
@@ -116,6 +116,7 @@ for i in range(0, 1):
     geom.rock.bh_max = 1.0  # 0.0001 #0.02000 #m
     geom.rock.bh_bound = np.random.uniform(0.0001, 0.001)
     geom.rock.f_roughness = [0.25 ** 2, 0.5 ** 2, 1.0]  # np.random.uniform(0.25**2,1.0) #0.8
+
     # well parameters
     geom.rock.w_count = 1  # production well
     geom.rock.w_azimuth = 104.9998 * deg  # rad
@@ -130,9 +131,11 @@ for i in range(0, 1):
     geom.rock.rb = 0.102  # m
     geom.rock.rc = 0.114  # m
     geom.rock.rgh = 80.0
+
     # cement properties
     geom.rock.CemKt = 2.0  # W/m-K
     geom.rock.CemSv = 2000.0  # kJ/m3-K
+
     # thermal-electric power parameters
     geom.rock.GenEfficiency = 0.85  # kWe/kWt
     geom.rock.LifeSpan = 3.0 * yr  # years #typical EGS service life should be 10-40 years
@@ -142,11 +145,13 @@ for i in range(0, 1):
     geom.rock.H_ConvCoef = 3.0  # kW/m2-K
     geom.rock.dT0 = 1.0  # K
     geom.rock.dE0 = 50.0  # kJ/m2
+
     # water base parameters
     geom.rock.PoreRho = np.random.uniform(920.0, 932.0)  # kg/m3
     geom.rock.Poremu = 0.2 * cP  # Pa-s
     geom.rock.Porek = 0.1 * mD  # m2
     geom.rock.kf = 300.0 * um2cm  # m2 #100 um2cm = 0.11 mD
+
     # stimulation parameters
     geom.rock.perf = 1  # number of peforation clusters #!!!
     geom.rock.sand = 0.044  # sand ratio in frac fluid by volume #!!!
@@ -164,7 +169,7 @@ for i in range(0, 1):
     geom.rock.hfphi = np.random.uniform(15.0, 35.0) * deg  # 30.0*deg
 
     # ****************************************************************************
-    #### model initializtion stuff
+    # model initialization stuff
     # ****************************************************************************
 
     # recalculate base parameters
@@ -189,7 +194,6 @@ for i in range(0, 1):
                 f]  # note that this aperture is the 'zero stress' aperture, the hydraulic aperture is computed by GeoDT using geomechanics
             # geom.fracs[-1].u_alpha = alphas[i] #this is a placeholder for the value Aleta used, I'm including it only to be consistent, I recommend the GeoDT defaults
     # copy site parameters with natural fractures populated
-    site = []
     site = copy.deepcopy(geom)
     # print the fracture geometry
     geom.re_init()
@@ -198,7 +202,7 @@ for i in range(0, 1):
         geom.build_vtk(fname=build_path(f'start{pin}'), vtype=[0, 0, 0, 0, 0, 1])  # show model boundary
 
     # ****************************************************************************
-    #### varied design parameters
+    # varied design parameters
     # ****************************************************************************
 
     # investigate different well spacings - uniform sampling
@@ -206,7 +210,6 @@ for i in range(0, 1):
     # spacings = [200.0]
     for s in spacings:
         # get original site parameters
-        geom = []
         geom = copy.deepcopy(site)
         # set well spacing and seed hydrofrac size r_perf
         geom.rock.w_spacing = s  # m #will be varied below
@@ -215,7 +218,6 @@ for i in range(0, 1):
         wells = []
         geom.gen_wells(True, wells)
         # copy geometry with placed wells
-        base = []
         base = copy.deepcopy(geom)
 
         # investigate different flow rates - logarithmic sampling
@@ -223,7 +225,6 @@ for i in range(0, 1):
         # flows = [0.03]
         for f in flows:
             # load geometry with wells placed
-            geom = []
             geom = copy.deepcopy(base)
             # solve for stimulation and circulation at specified circulation rate Qinj
             geom.rock.Qinj = f
@@ -241,11 +242,14 @@ for i in range(0, 1):
                 # save a 3D model of the scenario
                 geom.build_vtk(fname=build_path(f'fin_{pin}'), vtype=[1, 0, 1, 1, 1, 0])
 
-                # 3D temperature visual (this is a slow process that can help with model validation, so it is not typically used)
-                if False:
+                # 3D temperature visual
+                # (this is a slow process that can help with model validation, so it is not typically used)
+                enable_3d_temperature_visual = False
+                if enable_3d_temperature_visual:
                     geom.build_pts(spacing=100.0, fname=build_path(f'fin_{pin}'))
 
-                # save primary inputs and outputs, if hydrofracs occur, they will be the last item in the list of fractures
+                # save primary inputs and outputs, if hydrofracs occur,
+                # they will be the last item in the list of fractures
                 aux = [['type_last', geom.faces[-1].typ],
                        ['Pc_last', geom.faces[-1].Pc],
                        ['sn_last', geom.faces[-1].sn],
@@ -259,8 +263,10 @@ for i in range(0, 1):
                 geom.save(build_path('inputs_results_FORGE.txt'), pin, aux=aux, printwells=0, time=True)
 
             # if False:
-            except Exception as e:  # placeholder for failed models, note that sometimes models fail for physical reasons (not just unhandled numerical errors)
-                # (note that failed models can signifiy a failed field test, so failures are a valid result)
+            except Exception as e:
+                # placeholder for failed models, note that sometimes models fail for physical reasons
+                # (not just unhandled numerical errors)
+                # (note that failed models can signify a failed field test, so failures are a valid result)
                 print(f'Solver failure: {e}')
 
             # generate next pin
