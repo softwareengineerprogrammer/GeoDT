@@ -1,11 +1,12 @@
 # ****************************************************************************
 #### Datathon 2023 example script - Luke Frash using data from Aleta Finnila
 # ****************************************************************************
-from pathlib import Path
 
 # ****************************************************************************
 #### standard imports
 # ****************************************************************************
+from pathlib import Path
+
 import numpy as np
 import matplotlib.pyplot as plt
 import GeoDT as gt
@@ -13,15 +14,17 @@ import pylab
 import copy
 
 #units (standard will be: N, m, kg, s, K, Pa, etc.)
-deg = gt.deg
-MPa = gt.MPa
-GPa = gt.GPa
-yr = gt.yr
-cP = gt.cP
-mD = gt.mD
-mLmin = gt.mLmin
-um2cm = gt.um2cm
+from GeoDT import deg as deg
+from GeoDT import MPa as MPa
+from GeoDT import GPa as GPa
+from GeoDT import yr as yr
+from GeoDT import cP as cP
+from GeoDT import mD as mD
+from GeoDT import mLmin  as mLmin
+from GeoDT import um2cm as um2cm
 gal = 1.0/264.172 #m3
+
+import geodt_utils
 
 
 # ****************************************************************************
@@ -57,6 +60,9 @@ for i in range(0,1):
     # ****************************************************************************
     #generate pin
     pin = np.random.randint(100000000,999999999,1)[0]
+
+    def build_path(file_name):
+        return geodt_utils.build_path(pin, file_name)
     
     #create model object
     geom = []
@@ -184,9 +190,9 @@ for i in range(0,1):
     site = copy.deepcopy(geom)
     #print the fracture geometry
     geom.re_init()
-    geom.build_vtk(fname='start%i' %(pin),vtype=[0,1,0,0,0,0]) #show natural fractures
+    geom.build_vtk(fname=build_path(f'start{pin}'),vtype=[0,1,0,0,0,0]) #show natural fractures
     if (i == 0):
-        geom.build_vtk(fname='start%i' %(pin),vtype=[0,0,0,0,0,1]) #show model boundary
+        geom.build_vtk(fname=build_path(f'start{pin}'),vtype=[0,0,0,0,0,1]) #show model boundary
             
     # ****************************************************************************
     #### varied design parameters
@@ -222,19 +228,19 @@ for i in range(0,1):
             try: #normal workflow if solution is successful
             # if True:
                 geom.dyn_stim(Vinj=geom.rock.Vinj,Qinj=geom.rock.Qinj,target=[],
-                                visuals=False,fname='run_%i' %(pin))
+                                visuals=False,fname=build_path(f'run_{pin}'))
                 geom.get_heat(plot=True,detail=True,lapse=False)
-                plt.savefig('plt_%i.png' %(pin), format='png')
+                plt.savefig(build_path(f'plt_{pin}.png'), format='png')
                 plt.close()
                 
                 NPV, P, C, Q = geom.get_economics(detail=True)
                 
                 #save a 3D model of the scenario
-                geom.build_vtk(fname='fin_%i' %(pin),vtype=[1,0,1,1,1,0])
+                geom.build_vtk(fname=build_path(f'fin_{pin}'),vtype=[1,0,1,1,1,0])
                 
                 #3D temperature visual (this is a slow process that can help with model validation, so it is not typically used)
                 if False: 
-                    geom.build_pts(spacing=100.0,fname='fin_%i' %(pin))
+                    geom.build_pts(spacing=100.0,fname=build_path(f'fin_{pin}'))
                 
                 #save primary inputs and outputs, if hydrofracs occur, they will be the last item in the list of fractures
                 aux = [['type_last',geom.faces[-1].typ],
@@ -247,15 +253,15 @@ for i in range(0,1):
                         ['cost_capital',C],
                         ['risk_quakes',Q],
                         ['NPV',geom.NPV]]
-                geom.save('inputs_results_FORGE.txt',pin,aux=aux,printwells=0,time=True)
+                geom.save(build_path('inputs_results_FORGE.txt'),pin,aux=aux,printwells=0,time=True)
             
             # if False:
             except Exception as e: #placeholder for failed models, note that sometimes models fail for physical reasons (not just unhandled numerical errors)
-                #(note that failed models can signifiy a failed feild test, so failures are a valid result)
+                #(note that failed models can signifiy a failed field test, so failures are a valid result)
                 print(f'Solver failure: {e}')
                 
             #generate next pin
             pin = np.random.randint(100000000,999999999,1)[0]
 
 #show plots
-pylab.show()
+pylab.show(block=False)
