@@ -1523,8 +1523,7 @@ class Mesh:
             w_h_s = np.zeros((max_w, r.TimeSteps - 1), dtype=float)
             if len(self.wells) > max_w:
                 print(
-                    'warning: number of wells exceeds specified output number of %i so not all values will be printed' % (
-                        max_w))
+                    f'warning: number of wells exceeds specified output number of {max_w} so not all values will be printed')
             # use array math to store values in fixed-width arrays
             if self.wells:  # error handling for case with no wells
                 n = np.min([len(self.wells), max_w])
@@ -1547,35 +1546,48 @@ class Mesh:
                         out += [['h%i:%.3f' % (w, self.ts[t] / yr), w_h_s[w, t]]]
 
         # output to file
-        # out = zip(*out)
-        out = list(map(list, zip(*out)))
-        head = out[0][0]
-        for i in range(1, len(out[0])):
-            head = head + ',' + out[0][i]
-        data = '%i' % (out[1][0])
-        for i in range(1, len(out[1])):
-            if not out[1][i]:
-                data = data + ',0.0'  # ',nan'
-            else:
-                data = data + ',%.5e' % (out[1][i])
-        try:
-            with open(fname, 'r') as f:
-                test = f.readline()
-            f.close()
-            if test != '':
-                with open(fname, 'a') as f:
-                    f.write(data + '\n')
+        if fname.endswith('.txt'):
+            # out = zip(*out)
+            out = list(map(list, zip(*out)))
+            head = out[0][0]
+            for i in range(1, len(out[0])):
+                head = head + ',' + out[0][i]
+            data = str(out[1][0])
+            for i in range(1, len(out[1])):
+                if not out[1][i]:
+                    data = data + ',0.0'  # ',nan'
+                else:
+                    data = data + ',%.5e' % (out[1][i])
+            try:
+                with open(fname, 'r') as f:
+                    test = f.readline()
                 f.close()
-            else:
+                if test != '':
+                    with open(fname, 'a') as f:
+                        f.write(data + '\n')
+                    f.close()
+                else:
+                    with open(fname, 'a') as f:
+                        f.write(head + '\n')
+                        f.write(data + '\n')
+                    f.close()
+            except:
                 with open(fname, 'a') as f:
                     f.write(head + '\n')
                     f.write(data + '\n')
                 f.close()
-        except:
-            with open(fname, 'a') as f:
-                f.write(head + '\n')
-                f.write(data + '\n')
+        elif fname.endswith('.csv'):
+            with open(fname,'a') as f:
+                f.write('Key,Value\n')
+                for out_kv_pair in out:
+                    key = out_kv_pair[0]
+                    value = out_kv_pair[1]
+                    f.write(f'{key},{value}\n')
+
             f.close()
+        else:
+            raise ValueError('Invalid file extension')
+
 
     #
     #        return out

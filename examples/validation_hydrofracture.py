@@ -63,6 +63,7 @@ geom.rock.fStr = np.asarray([[351.0 * deg, 15.0 * deg],
 geom.rock.fDip = np.asarray([[80.0 * deg, 7.0 * deg],
                              [48.0 * deg, 7.0 * deg, ],
                              [64.0 * deg, 7.0 * deg]], dtype=float)  # m
+
 # fracture hydraulic parameters
 geom.rock.gamma = np.asarray([10.0 ** -3.0, 10.0 ** -2.0, 10.0 ** -1.2])
 geom.rock.n1 = np.asarray([1.0, 1.0, 1.0])
@@ -76,6 +77,7 @@ geom.rock.bh_min = 0.000030001  # 0.00005 #m #!!!
 geom.rock.bh_max = 0.01  # 0.01 #m #!!!
 geom.rock.bh_bound = 0.001
 geom.rock.f_roughness = np.random.uniform(0.7, 1.0)  # 0.8
+
 # well parameters
 geom.rock.w_count = 3  # 2 #wells
 geom.rock.w_spacing = 400.0  # m
@@ -89,9 +91,11 @@ geom.rock.w_skew = 0.0 * deg  # rad
 geom.rock.w_intervals = 1  # breaks in well length
 geom.rock.ra = 0.0254 * 5.0  # 0.0254*3.0 #m
 geom.rock.rgh = 80.0
+
 # cement properties
 geom.rock.CemKt = 2.0  # W/m-K
 geom.rock.CemSv = 2000.0  # kJ/m3-K
+
 # thermal-electric power parameters
 geom.rock.GenEfficiency = 0.85  # kWe/kWt
 geom.rock.LifeSpan = 20.5 * yr  # years
@@ -101,11 +105,13 @@ geom.rock.Tinj = 95.0  # C
 geom.rock.H_ConvCoef = 3.0  # kW/m2-K
 geom.rock.dT0 = 10.0  # K
 geom.rock.dE0 = 500.0  # kJ/m2
+
 # water base parameters
 geom.rock.PoreRho = 980.0  # kg/m3 starting guess
 geom.rock.Poremu = 0.9 * cP  # Pa-s
 geom.rock.Porek = 0.1 * mD  # m2
 geom.rock.Frack = 100.0 * mD  # m2
+
 # stimulation parameters
 if geom.rock.w_intervals == 1:
     geom.rock.perf = int(np.random.uniform(1, 1))
@@ -142,28 +148,31 @@ wells = []
 geom.gen_wells(True, wells)
 
 # stimulate
-geom.dyn_stim(Vinj=geom.rock.Vstim, Qinj=geom.rock.Qstim, target=[],
-              visuals=True, fname=build_path('stim'))
+geom.dyn_stim(Vinj=geom.rock.Vstim,
+              Qinj=geom.rock.Qstim,
+              target=[],
+              visuals=True,
+              fname=build_path('stim'))
 
 #    #flow
 #    geom.dyn_stim(Vinj=geom.rock.Vinj,Qinj=geom.rock.Qinj,target=[],
 #                  visuals=False,fname=build_path(f'run_{pin}'))
-#    
-#    #heat flow
-#    geom.get_heat(plot=True)
-#    plt.savefig(build_path(f'plt_{pin}.png'), format='png')
-#    plt.close()
+
+#heat flow
+geom.get_heat(plot=True)
+plt.savefig(build_path(f'plt_{pin}.png'), format='png')
+plt.close()
 #    
 #    #show flow model
 #    geom.build_vtk(fname=build_path('fin_%i' %(pin)))
 #
 
-enable_3d_temperature_visual = False
+enable_3d_temperature_visual = True
 if enable_3d_temperature_visual:
     geom.build_pts(spacing=50.0, fname=build_path(f'fin_{pin}'))
 
 # save primary inputs and outputs
-x = geom.save(build_path('inputs_results_valid.txt'), pin)
+x = geom.save(build_path('inputs_results_valid.csv'), pin)
 
 # stereoplot
 geom.rock.stress.plot_Pc(geom.rock.phi[1], geom.rock.mcc[1], filename=build_path('Pc_stereoplot.png'))
