@@ -4059,8 +4059,8 @@ class Mesh:
         Qis += [Qi]
 
         # final visualization
-        Qis = np.asarray(Qis)
-        Pis = np.asarray(Pis)
+        # Qis = np.asarray(Qis)
+        # Pis = np.asarray(Pis)
         if visuals:
             # create vtk with final flow data
             fname2 = f'{fname}_B2'
