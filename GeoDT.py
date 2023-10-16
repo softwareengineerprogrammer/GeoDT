@@ -879,7 +879,7 @@ class Pipes:
                 self.Dh_max[i] = t_max
             else:
                 print('error: undefined type of conduit')
-                exit
+                exit()
 
 
 class Mesh:
@@ -2583,14 +2583,12 @@ class Mesh:
             # add to model domain
             self.wells = wells
 
-    # ************************************************************************
-    # stimulation - add frac
-    # ************************************************************************
     def add_frac(self, typ='propped',
                  c0=np.asarray([0.0, 0.0, 0.0]),
                  dia=[1266.0, 107.0],
                  azn=[65.0 * deg, 4.0 * deg],
                  dip=[57.5 * deg, 3.75 * deg]):
+        """stimulation - add frac"""
         print('   + placing new frac')
         fleg = np.random.normal(dia[0], dia[1])
         fazn = np.random.normal(azn[0], azn[1])
@@ -2598,21 +2596,25 @@ class Mesh:
         self.hydfs += [Surface(c0[0], c0[1], c0[2], fleg, fazn, fdip, typ, self.rock)]
 
     # ************************************************************************
-    # find intersections
+    #
     # ************************************************************************
     def gen_pipes(self, plot=True):
+        """
+        find intersections
+
+        This code segment:
+          1. finds intersections & break lines into segments for the flow
+          2. builds the input deck for the flow model
+          3. be compatible with heat transfer model
+          4. not produce duplicate segments
+          5. be as efficient as I can muster
+          6. reject dead ends if possible
+          7. add infinite fracture elements to nodes on boundary
+               #re-initialize the geometry - building list of faces
+               self.re_init()
+        calculate intersections for each well
+        """
         #        print( '*** intersections module ***')
-        # This code segment:
-        #   1. finds intersections & break lines into segments for the flow
-        #   2. builds the input deck for the flow model
-        #   3. be compatible with heat transfer model
-        #   4. not produce duplicate segments
-        #   5. be as efficient as I can muster
-        #   6. reject dead ends if possible
-        #   7. add infinite fracture elements to nodes on boundary
-        #        #re-initialize the geometry - building list of faces
-        #        self.re_init()
-        # calculate intersections for each well
         found = False
         for w in range(0, len(self.wells)):
             found += self.x_well_all_faces(sourceID=w)
@@ -2626,7 +2628,7 @@ class Mesh:
                 # loop breaker
                 iters += 1
                 if iters > maxit:
-                    print('-> intersection search stopped after 20 iterations')
+                    print(f'-> intersection search stopped after {maxit} iterations')
                     break
                 # focus on chain connecting back to wells
                 track = np.asarray(self.trakr)
@@ -2656,14 +2658,13 @@ class Mesh:
                 if conn:
                     break
             # report number of iterations used to find intersections
-            print('-> all intersections found using %i iters of %i allowable' % (iters, maxit))
+            print(f'-> all intersections found using {iters} iters of {maxit} allowable')
         else:
             print('-> wells do not intersect any fractures')
 
-    # ************************************************************************
-    # energy generation - single flash steam rankine cycle
-    # ************************************************************************
     def get_power(self, detail=False):
+        """energy generation - single flash steam rankine cycle"""
+
         # initialization
         self.Fout = []
         self.Bout = []
@@ -2942,11 +2943,9 @@ class Mesh:
         #     print( "Flash Power at %.2f yr = %.2f kW" %(self.ts[-1]/yr,Pout))
         #     print( "Binary Power at %.2f yr = %.2f kW" %(self.ts[-1]/yr,Bout))
 
-    # ************************************************************************
-    # flow network model
-    # ************************************************************************
-    #    def get_flow(self,p_bound=0.0*MPa,q_inlet=[],q_outlet=[],p_inlet=[],p_outlet=[],reinit=True):
+
     def get_flow(self, p_bound=0.0 * MPa, q_well=[], p_well=[], reinit=True, useprior=False, Qnom=1.0):
+        """flow network model"""
         # reinitialize if the mesh has changed
         if reinit:
             # clear data from prior run
@@ -3027,7 +3026,7 @@ class Mesh:
             # type not handled
             else:
                 print('error: undefined type of conduit')
-                exit
+                exit()
         # record info
         self.pipes.K = K
         self.pipes.n = n
@@ -3152,11 +3151,6 @@ class Mesh:
         self.b_p = b_p
         self.b_q = b_q
 
-    # ************************************************************************
-    # heat transfer model
-    # - mod 1-28-2021: correct errors
-    # - mod 9-13-2022: reduce overshoot in initial timesteps
-    # ************************************************************************
     def get_heat(self, plot=True,
                  t_n=-1,  # steps
                  t_f=-1.0 * yr,  # s
@@ -3165,6 +3159,11 @@ class Mesh:
                  dE0=-666.6,  # kJ/m2
                  detail=False,
                  lapse=False):
+        """
+        heat transfer model
+        - mod 1-28-2021: correct errors
+        - mod 9-13-2022: reduce overshoot in initial timesteps
+        """
         print('*** heat flow module ***')
         # ****** default parameters ******
         if t_n < 0:
