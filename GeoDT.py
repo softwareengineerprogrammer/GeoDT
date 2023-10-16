@@ -56,8 +56,11 @@ pi = math.pi
 # ****************************************************************************
 #### classes, functions, and modules
 # ****************************************************************************
-# Place a radial hydraulic fracture of radius r at x0
+
 def HF(r, x0, strikeRad, dipRad, h=0.5):
+    """
+    Place a radial hydraulic fracture of radius r at x0
+    """
     # start with a disk
     disk = sg.diskObj(r, h)
     disk = sg.rotateObj(disk, [0.0, 1.0, 0.0], dipRad)
@@ -65,9 +68,11 @@ def HF(r, x0, strikeRad, dipRad, h=0.5):
     disk = sg.transObj(disk, x0)
     return disk
 
-
-# definitions and cross-referencing for pipe types
 def typ(key):
+    """
+    definitions and cross-referencing for pipe types
+    """
+
     ret = []
     choices = np.asarray([
         ['boundary', '-3'],
@@ -91,8 +96,12 @@ def typ(key):
     return ret
 
 
-# azn and dip from endpoints
 def azn_dip(x0, x1):
+    """
+    Returns
+    -------
+    azn and dip from endpoints
+    """
     dx = x1[0] - x0[0]
     dy = x1[1] - x0[1]
     dz = x1[2] - x0[2]
@@ -497,9 +506,16 @@ class Reservoir:
         # stimulation parameters
         self.perf = 1
         self.r_perf = 50.0  # m
-        self.sand = 0.3  # sand ratio in frac fluid by volume
-        self.leakoff = 0.0  # Carter leakoff
-        self.dPp = -2.0 * MPa  # production well pressure drawdown
+
+        self.sand = 0.3
+        """sand ratio in frac fluid by volume"""
+
+        self.leakoff = 0.0
+        """Carter leakoff"""
+
+        self.dPp = -2.0 * MPa
+        """production well pressure drawdown"""
+
         self.dPi = 0.5 * MPa
         self.stim_limit = 5
         self.Qinj = 0.01  # m3/s
@@ -507,7 +523,10 @@ class Reservoir:
         self.Qstim = 0.04  # m3/s
         self.Vstim = 50000.0  # m3
         self.pfinal_max = 999.9 * MPa  # Pa, maximum long term injection pressure
-        self.bval = 1.0  # Gutenberg-Richter magnitude scaling
+
+        self.bval = 1.0
+        """Gutenberg-Richter magnitude scaling"""
+
         self.phi = np.asarray([20.0 * deg, 35.0 * deg, 50.0 * deg])  # rad
         self.mcc = np.asarray([5.0 * MPa, 10.0 * MPa, 15.0 * MPa])  # Pa
         self.hfmcc = 0.1 * MPa
@@ -1657,7 +1676,7 @@ class Mesh:
                              dipRad=self.faces[i].dip, h=0.01 * r)]
             # vtk file
             f_col = [f_0, f_1, f_2, f_3, f_4, f_5]
-            sg.writeVtk(f_obj, f_col, f_lab, vtkFile=(fname + '_fracs.vtk'))
+            sg.writeVtk(f_obj, f_col, f_lab, vtkFile=(f'{fname}_fracs.vtk'))
 
         # ******   paint flowing fractures   ******
         if vtype[2] and len(self.faces) > 6:
@@ -3658,15 +3677,29 @@ class Mesh:
             ax4.set_ylabel('Thermal Extraction (kJ/s)')
             # ax4.set_ylim(bottom=0.0)
 
-    # ************************************************************************
-    # stimulation - add frac (Vinj is total volume per stage, sand ratio to frac slurry by volume)
-    # ************************************************************************
-    def dyn_stim(self, Vinj=-1.0, Qinj=-1.0, dpp=-666.6 * MPa,
-                 sand=-1.0, leakoff=-1.0,
-                 target=0, perfs=-1, r_perf=-1.0,
-                 visuals=True, fname='stim',
-                 pfinal_max=999.9 * MPa):
+    def dyn_stim(
+            self,
+            Vinj=-1.0,
+            Qinj=-1.0,
+            dpp=-666.6 * MPa,
+            sand=-1.0,
+            leakoff=-1.0,
+            target=0,
+            perfs=-1,
+            r_perf=-1.0,
+            visuals=True,
+            fname='stim',
+            pfinal_max=999.9 * MPa):
+        """
+        stimulation - add frac
+
+        Parameters
+        ----------
+        Vinj -- total volume per stage, sand ratio to frac slurry by volume
+        """
+
         print('*** dynamic stim module ***')
+
         # fetch defaults
         if perfs < 0:
             perfs = self.rock.perf
@@ -3701,10 +3734,10 @@ class Mesh:
         p_div = 0
         p_key = []
         for i in range(0, len(self.wells)):
-            if (int(self.wells[i].typ) in [typ('injector')]):
+            if int(self.wells[i].typ) in [typ('injector')]:
                 i_key += [int(i)]
                 i_div += 1
-            if (int(self.wells[i].typ) in [typ('producer')]):
+            if int(self.wells[i].typ) in [typ('producer')]:
                 p_key += [int(i)]
                 p_div += 1
         i_key = np.asarray(i_key, dtype=int)
@@ -3762,15 +3795,16 @@ class Mesh:
             ws = []
             Vs = []
             Pn = []
+
         iters = 0
         maxit = 40
         while 1:
             # loop breaker
             if iters >= maxit:
-                print('-> rock stimulation halted at %i iterations' % (iters))
+                print(f'-> rock stimulation halted at {iters} iterations')
                 break
             iters += 1
-            print('\n[%i] rock stimulation step' % (iters))
+            print(f'\n[{iters}] rock stimulation step')
 
             # get test injection pressures
             for i in range(0, i_div):
@@ -3805,7 +3839,7 @@ class Mesh:
 
             # create vtk
             if visuals:
-                fname2 = fname + '_A_%i' % (iters)
+                fname2 = f'{fname}_A_{iters}'
                 self.build_vtk(fname2, vtype=[0, 0, 1, 1, 1, 0])
 
             # stimulation complete if pressure driven injection rate exceeds stimulation injection rate in all wells
@@ -3815,9 +3849,9 @@ class Mesh:
                     completed[i] = True
                     # stabilize[i] = True #!!!
 
-            # break if all are compeleted
+            # break if all are completed
             if np.sum(completed) == i_div:
-                print('-> stimulation complete: full flow acheived')
+                print('-> stimulation complete: full flow achieved')
                 break
 
             # get max pressure on each fracture from all the nodes associated with that fracture
@@ -3857,12 +3891,14 @@ class Mesh:
                 #         if not(completed[j]):
                 #             hydrofrac[j] = True
                 #             self.wells[i_key[j]].hydrofrac = True
+
                 # variable tracking for visuals
                 if visuals:
                     R += [0.5 * self.faces[i].dia]
                     w += [self.faces[i].bd]
                     V += [(4.0 / 3.0) * pi * 0.25 * self.faces[i].dia ** 2.0 * 0.5 * self.faces[i].bd]
                     P += [self.faces[i].Pcen]
+
             if visuals:
                 Rs += [R]
                 ws += [w]
@@ -3873,8 +3909,9 @@ class Mesh:
             if visuals:
                 t = []
                 P = []
+
             for i in range(0, i_div):
-                # only modify stimualtions if stage is not yet completed
+                # only modify stimulations if stage is not yet completed
                 if not (completed[i]):
                     # calculate volume change before next fracture in chain will be triggered
                     time_step = (vol_new - vol_old) / (Qinj - Qi[i])
@@ -3883,17 +3920,18 @@ class Mesh:
 
                     # stage complete if target volume is reached
                     if vol_rem[i] < 0.0:
-                        print('   $ (%i) completed by reaching target injection volume' % (i))
+                        print(f'   $ ({i}) completed by reaching target injection volume')
                         completed[i] = True
 
                     # stimulate hydraulic fractures if criteria met
                     # if (nat_stim == False) and (tip > self.rock.s3+0.1*MPa) and (hydrofrac == False): #and (np.max(self.p_p) < 0.0):
                     elif (self.wells[i_key[i]].hydrofrac == False) and (tip[i] > (self.rock.s3 + self.rock.hfmcc)):
-                        print('   ! (%i) hydraulic fractures' % (i))
+                        print(f'   ! ({i}) hydraulic fractures')
                         # hydrofrac[i] = True
                         self.wells[i_key[i]].hydrofrac = True  # !!!
                         # seed hydraulic fracture
-                        self.gen_stimfracs(target=i_key[i], perfs=perfs,
+                        self.gen_stimfracs(target=i_key[i],
+                                           perfs=perfs,
                                            f_dia=[2.0 * r_perf, 0.0],
                                            f_azn=[self.rock.s3Azn + np.pi / 2.0, self.rock.s3AznVar],
                                            f_dip=[np.pi / 2.0 - self.rock.s3Dip, self.rock.s3DipVar],
@@ -3904,7 +3942,8 @@ class Mesh:
                             si = self.hydfs[fi].sn
                             # self.hydfs[len(self.hydfs)-notch-1].make_critical(rock=self.rock,pres=(tip[i]-0.5*self.rock.dPi)) #!!! check uses injection pressure
                             self.hydfs[fi].make_critical(rock=self.rock, pres=(si + self.rock.hfmcc))
-                    # if insufficient pressure and insufficient rate or too many repeated stimulations, increase pressure
+                    # if insufficient pressure and insufficient rate or too many repeated stimulations,
+                    # increase pressure
                     elif ((nat_stim == False) or (((int(num_stim) + 1) % int(self.rock.stim_limit)) == 0)):
                         dpi[i] += self.rock.dPi
                         print('   + (%i) pressure increased to %.3f, %.3f absolute' % (
@@ -4025,7 +4064,7 @@ class Mesh:
         Pis = np.asarray(Pis)
         if visuals:
             # create vtk with final flow data
-            fname2 = fname + '_B2'
+            fname2 = f'{fname}_B2'
             self.build_vtk(fname2)
             self.v_Rs = Rs
             self.v_ts = ts
