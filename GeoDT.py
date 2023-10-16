@@ -66,7 +66,7 @@ def HF(r, x0, strikeRad, dipRad, h=0.5):
     return disk
 
 
-# definitions and cross referencing for pipe types
+# definitions and cross-referencing for pipe types
 def typ(key):
     ret = []
     choices = np.asarray([
@@ -749,7 +749,7 @@ class Line:
         # stimulation traits
         self.hydrofrac = False  # was well already hydrofraced?
         self.completed = False  # was well stimulation process completed?
-        self.stabilize = False  # was well flow stabilied?
+        self.stabilize = False  # was well flow stabilized?
 
 
 class Nodes:
@@ -1808,7 +1808,7 @@ class Mesh:
 
         # seek temperature drawdown
         for i in range(0, self.pipes.num):
-            print('pipe %i' % (i))
+            print(f'pipe {i}')
             # collect fracture parameters
             x0 = self.nodes.all[self.pipes.n0[i]]
             x1 = self.nodes.all[self.pipes.n1[i]]
