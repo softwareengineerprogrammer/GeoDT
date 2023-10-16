@@ -416,6 +416,13 @@ class Reservoir:
         self.fNum = np.asarray([10,
                                 10,
                                 10], dtype=int)  # count
+        """
+        number of fractures in each set
+        fNum[0] = Poles in NE & SW quadrant (i.e., sub perpendicular to wells)
+        fNum[1] = Poles in NW & SE quadrant (i.e., sub parallel to wells)
+        fNum[2] = Poles subvertical (i.e., sub-parallel to wells conjugate joint set)
+        """
+
         self.fDia = np.asarray([[300.0, 900.0],
                                 [300.0, 900.0],
                                 [300.0, 900.0]], dtype=float)  # m
