@@ -25,6 +25,8 @@ def build_path(file_name):
     return geodt_utils.build_path(pin, file_name)
 
 
+pin = geodt_utils.generate_pin()
+
 # ****************************************************************************
 #### model setup
 # ****************************************************************************        
@@ -51,6 +53,7 @@ for i in range(0, 1):
     geom.rock.s3AznVar = 0.0 * deg
     geom.rock.s3Dip = 0.0 * deg
     geom.rock.s3DipVar = 0.0 * deg
+
     # fracture orientation parameters #[i,:] set, [0,0:2] min, max --or-- nom, std
     #    geom.rock.fNum = np.asarray([int(np.random.uniform(0,30)),
     #                            int(np.random.uniform(0,30)),
@@ -67,12 +70,19 @@ for i in range(0, 1):
     #    geom.rock.fDip = np.asarray([[np.random.uniform(0.0,90.0)*deg,np.random.uniform(0.0,45.0)*deg],
     #                            [np.random.uniform(0.0,90.0)*deg,np.random.uniform(0.0,45.0)*deg],
     #                            [np.random.uniform(0.0,90.0)*deg,np.random.uniform(0.0,45.0)*deg]],dtype=float) #m
-    geom.rock.fNum = np.asarray([int(np.random.uniform(0, 30)),
-                                 int(np.random.uniform(0, 120)),
-                                 int(np.random.uniform(0, 30))], dtype=int)  # count
+    geom.rock.fNum = np.asarray(
+        [
+            int(np.random.uniform(0, 30)),
+            int(np.random.uniform(0, 120)),
+            int(np.random.uniform(0, 30))
+        ],
+        dtype=int
+    )  # count
+
     geom.rock.fDia = np.asarray([[400.0, 1200.0],
                                  [200.0, 1000.0],
                                  [400.0, 1200.0]], dtype=float)  # m
+
     # FORGE rotated 104 CCW
     geom.rock.fStr = np.asarray([[351.0 * deg, 15.0 * deg],
                                  [80.0 * deg, 15.0 * deg],
@@ -80,6 +90,7 @@ for i in range(0, 1):
     geom.rock.fDip = np.asarray([[80.0 * deg, 7.0 * deg],
                                  [48.0 * deg, 7.0 * deg, ],
                                  [64.0 * deg, 7.0 * deg]], dtype=float)  # m
+
     # fracture hydraulic parameters
     geom.rock.gamma = np.asarray([10.0 ** -3.0, 10.0 ** -2.0, 10.0 ** -1.2])
     geom.rock.n1 = np.asarray([1.0, 1.0, 1.0])
@@ -140,9 +151,10 @@ for i in range(0, 1):
 
     geom.rock.bh_min = 0.00005  # m
     geom.rock.bh_max = 0.01  # 0.02000 #m
-    #        geom.rock.bh_bound = np.random.uniform(0.001,0.005)
+    # geom.rock.bh_bound = np.random.uniform(0.001,0.005)
     geom.rock.bh_bound = 0.001
     geom.rock.f_roughness = np.random.uniform(0.7, 1.0)  # 0.8
+
     # well parameters
     # geom.rock.w_count = int(np.random.uniform(1,4)) #2 #wells
     # geom.rock.w_spacing = np.random.uniform(100.0,800.0) #300.0 #m
@@ -233,22 +245,26 @@ for i in range(0, 1):
     geom.gen_wells(True, wells)
 
     # stimulate
-    geom.dyn_stim(Vinj=geom.rock.Vstim, Qinj=geom.rock.Qstim, target=[],
-                  visuals=False, fname='stim')
+    geom.dyn_stim(
+        Vinj=geom.rock.Vstim,
+        Qinj=geom.rock.Qstim,
+        target=[],
+        visuals=False,
+        fname=build_path('stim')
+    )
 
     # test multiple randomly selected flow rates
     # rates = np.random.uniform(0.005,0.08,10)
     rates = [0.01]
     for r in rates:
+        rate_id = str(r).replace('.', '_')
+
         # copy base parameter set
-        base = []
         base = copy.deepcopy(geom)
 
         # set rate
         base.rock.Qinj = r
         base.rock.re_init()
-
-        pin = geodt_utils.generate_pin()
 
         try:
             # if True:
@@ -260,17 +276,17 @@ for i in range(0, 1):
 
             # Solve production
             base.dyn_stim(Vinj=base.rock.Vinj, Qinj=base.rock.Qinj, target=[],
-                          visuals=False, fname=build_path(f'run_{pin}'))
+                          visuals=True, fname=build_path(f'run_{pin}_rate_{rate_id}'))
 
             # calculate heat transfer
             base.get_heat(plot=True)
-            plt.savefig(build_path(f'plt_{pin}.png'), format='png')
+            plt.savefig(build_path(f'plt_{pin}_rate_{rate_id}.png'), format='png')
             plt.close()
         except:
             print('solver failure!')
 
         # show flow model
-        base.build_vtk(fname=build_path(f'fin_{pin}'))
+        base.build_vtk(fname=build_path(f'fin_{pin}_rate_{rate_id}'))
 
         if False:  # 3D temperature visual
             base.build_pts(spacing=50.0, fname=build_path(f'fin_{pin}'))
